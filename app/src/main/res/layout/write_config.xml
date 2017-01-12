@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="5">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:text="NFC ID:"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/nfc_id_write"
+                android:layout_weight="5"
+                android:textAlignment="textStart" />
+
+            <TextView
+                android:text="General Settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView10"
+                android:textSize="18sp"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimary" />
+
+            <CheckBox
+                android:text="Write New Settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxWriteNewSettings"
+                android:checked="false"
+                android:onClick="onCheckboxClicked"/>
+
+            <CheckBox
+                android:text="Enable Sensor 0 (Internal Temperature)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxEnableSensor0"
+                android:onClick="onCheckboxClicked"
+                android:checked="true" />
+
+            <CheckBox
+                android:text="Enable Sensor 1 (External)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxEnableSensor1"
+                android:onClick="onCheckboxClicked"
+                android:checked="true" />
+
+            <CheckBox
+                android:text="Insert Timestamps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxTimeStamps"
+                android:checked="true" />
+
+            <CheckBox
+                android:text="Enable SPI"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxSPI"
+                android:onClick="onCheckboxClicked"
+                android:checked="false" />
+
+            <TextView
+                android:text="Write Data From:"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView"
+                android:textSize="16sp"
+                android:textAlignment="center" />
+
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/radioGroupWriteDataFrom"
+                android:orientation="horizontal"
+                android:checkedButton="@+id/radioButton">
+
+
+                <RadioButton
+                    android:text="ADC Buffer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedWriteFrom"
+                    android:textSize="14sp" />
+
+                <RadioButton
+                    android:text="Internal Mem."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton2"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedWriteFrom"
+                    android:textSize="14sp" />
+
+                <RadioButton
+                    android:text="Reg. File"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton3"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedWriteFrom"
+                    android:textSize="14sp" />
+
+                <RadioButton
+                    android:text="External Memory (SPI)"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButtonWriteFromExternal"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedWriteFrom"
+                    android:textSize="14sp" />
+            </RadioGroup>
+
+
+            <TextView
+                android:text="Write Data To:"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView2"
+                android:textSize="16sp"
+                android:textAlignment="center" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/radioGroupWriteDataTo"
+                android:orientation="horizontal"
+                android:checkedButton="@+id/radioButton5">
+
+                    <RadioButton
+                        android:text="ADC Buffer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/radioButton4"
+                        android:layout_weight="1"
+                        android:onClick="onRadioButtonClickedWriteTo"
+                        android:textSize="14sp" />
+
+                <RadioButton
+                    android:text="Internal Mem."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton5"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedWriteTo"
+                    android:textSize="14sp" />
+
+                <RadioButton
+                        android:text="Reg. File"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/radioButton6"
+                        android:layout_weight="1"
+                        android:onClick="onRadioButtonClickedWriteTo"
+                        android:textSize="14sp" />
+
+                <RadioButton
+                    android:text="External Memory (SPI)"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButtonWriteToExternal"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedWriteTo"
+                    android:textAlignment="textStart"
+                    android:textSize="14sp" />
+
+            </RadioGroup>
+
+            <CheckBox
+                android:text="Default DMA Settings (Internal EEPROM)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxDefaultSettingsDMA"
+                android:onClick="onCheckboxClicked"
+                android:checked="true" />
+
+            <CheckBox
+                android:text="Manual DMA (for Automatic Data Logging)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxManualDMA"
+                android:onClick="onCheckboxClicked"
+                android:checked="true" />
+
+            <CheckBox
+                android:text="Automatic Logging Mode (Timer)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxAutomaticLoggingTimer"
+                android:onClick="onCheckboxClicked"
+                android:checked="true" />
+
+            <CheckBox
+                android:text="Automatic Standby (on Timer complete)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/timerStandby"
+                android:checked="true"
+                android:onClick="onCheckboxClicked"/>
+
+            <CheckBox
+                android:text="Timer IRQ Interrupt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/timerIRQ"
+                android:checked="false"
+                android:onClick="onCheckboxClicked"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:text="Timer Countdown Period"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView4"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="4"
+                    android:maxLength="5"
+                    android:id="@+id/editTextTimerCountdown"
+                    android:textAlignment="center"
+                    android:text="1"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:text="s"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textViewTimerUnits"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:text="Time Units"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView3"
+                android:textAlignment="center"
+                android:textSize="16sp" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:checkedButton="@+id/radioButton11">
+
+                <RadioButton
+                    android:text="Hours"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton9"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedTimerUnits"/>
+
+                <RadioButton
+                    android:text="Mins"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton10"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedTimerUnits"
+                    />
+
+                <RadioButton
+                    android:text="Seconds"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton11"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedTimerUnits"/>
+
+                <RadioButton
+                    android:text="Milliseconds"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton12"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedTimerUnits"/>
+            </RadioGroup>
+
+            <TextView
+                android:text="Sensor 0 Settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView6"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:textColor="@color/colorPrimary" />
+
+            <CheckBox
+                android:text="Enable Low Power Mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxSensor0LowPowerMode"
+                android:checked="true"
+                android:onClick="onCheckboxClicked"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <CheckBox
+                    android:text="Set Connection Config (0x19) - 0x"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/checkBoxSensor0InputMux"
+                    android:onClick="onCheckboxClicked"
+                    android:checked="true"/>
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:text="0231"
+                    android:ems="4"
+                    android:maxLength="4"
+                    android:id="@+id/editTextSensor0Mux"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <CheckBox
+                    android:text="Set Resistance Config (0x1A) - 0x"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/checkBoxSensor0Resistance"
+                    android:onClick="onCheckboxClicked"
+                    android:checked="true"/>
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:text="8000"
+                    android:ems="4"
+                    android:maxLength="4"
+                    android:id="@+id/editTextSensor0Resistance"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:text="Enable Chopper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxSensor0Chopper"
+                android:onClick="onCheckboxClicked"
+                android:checked="true" />
+
+            <TextView
+                android:text="Sensor 0 ADC Conversion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView8"
+                android:textAlignment="center"
+                android:textSize="16sp"
+                android:layout_weight="1" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:checkedButton="@+id/radioButton15">
+
+                <RadioButton
+                    android:text="Slowest, Most Accurate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton13"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedSensor0ADC"/>
+
+                <RadioButton
+                    android:text="Slow, Accurate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton14"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedSensor0ADC"/>
+
+                <RadioButton
+                    android:text="Fast, Less Accurate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton15"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedSensor0ADC"/>
+
+                <RadioButton
+                    android:text="Fastest, Least Accurate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton16"
+                    android:layout_weight="1"
+                    android:onClick="onRadioButtonClickedSensor0ADC"/>
+
+            </RadioGroup>
+
+            <TextView
+                android:text="Sensor 1 Settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView7"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:textColor="@color/colorPrimary" />
+
+            <CheckBox
+                android:text="Enable Low Power Mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxSensor1LowPowerMode"
+                android:onClick="onCheckboxClicked"
+                android:checked="true" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <CheckBox
+                    android:text="Set Connection Config (0x1F) - 0x"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/checkBoxSensor1InputMux"
+                    android:onClick="onCheckboxClicked"
+                    android:checked="true" />
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:text="0121"
+                    android:ems="4"
+                    android:maxLength="4"
+                    android:id="@+id/editTextSensor1Mux"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <CheckBox
+                    android:text="Set Resistance Config (0x20) - 0x"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/checkBoxSensor1Resistance"
+                    android:onClick="onCheckboxClicked"
+                    android:checked="true" />
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:text="0040"
+                    android:ems="4"
+                    android:maxLength="4"
+                    android:id="@+id/editTextSensor1Resistance"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:text="Enable Chopper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBoxSensor1Chopper"
+                android:onClick="onCheckboxClicked"
+                android:checked="true"/>
+
+            <TextView
+                android:text="Sensor 1 ADC Conversion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView9"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:textSize="16sp" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:checkedButton="@+id/radioButton19">
+
+                <RadioButton
+                    android:text="Slowest, Most Accurate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton17"
+                    android:onClick="onRadioButtonClickedSensor1ADC"
+                    android:layout_weight="1" />
+
+                <RadioButton
+                    android:text="Slow, Accurate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton18"
+                    android:onClick="onRadioButtonClickedSensor1ADC"
+                    android:layout_weight="1" />
+
+                <RadioButton
+                    android:text="Fast, Less Accurate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton19"
+                    android:onClick="onRadioButtonClickedSensor1ADC"
+                    android:layout_weight="1" />
+
+                <RadioButton
+                    android:text="Fastest, Least Accurate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/radioButton20"
+                    android:onClick="onRadioButtonClickedSensor1ADC"
+                    android:layout_weight="1" />
+
+            </RadioGroup>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:text="View Current Config"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/view_config"
+        android:layout_weight=".5"/>
+
+    <Button
+        android:text="Test Configuration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight=".5"
+        android:id="@+id/buttonTestConfig" />
+
+</LinearLayout>

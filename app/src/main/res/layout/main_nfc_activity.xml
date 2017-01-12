@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ap="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="NFC:"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textV"
+            android:layout_weight="1"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:text="nfc_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/nfc_data"
+            android:layout_weight="1"
+            android:textSize="18sp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <Button
+            android:text="Temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonTempMain"
+            android:layout_weight="1" />
+
+        <Button
+            android:text="View Config"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/viewConfig"
+            android:layout_weight="1" />
+
+        <Button
+            android:text="Configure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/writeConfig"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <com.androidplot.xy.XYPlot
+        style="@style/APDefacto.Dark"
+        android:id="@+id/dataPlot"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        ap:label="pH Data"
+        ap:rangeLabel="range"
+        ap:domainLabel="domain"
+        android:layout_weight="2"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        androidPlot.backgroundPaint.color="#FFFFFF"
+        androidPlot.borderPaint.color="#FFFFFF"
+        androidplot.renderMode="use_background_thread"
+        androidPlot.title="pH Data Plot"
+        androidPlot.domainLabel="Domain"
+        androidPlot.rangeLabel="Range"
+        androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"
+        androidPlot.domainLabelWidget.labelPaint.textSize="@dimen/domain_label_font_size"
+        androidPlot.rangeLabelWidget.labelPaint.textSize="@dimen/range_label_font_size"
+        androidPlot.graphWidget.backgroundPaint.color="#FFFFFF"
+        androidPlot.graphWidget.gridBackgroundPaint.color="#fafafa"
+        androidPlot.graphWidget.marginTop="12dp"
+        androidPlot.graphWidget.marginLeft="10dp"
+        androidPlot.graphWidget.marginBottom="14dp"
+        androidPlot.graphWidget.marginRight="0dp"
+        androidPlot.graphWidget.rangeOriginLabelPaint.textSize="@dimen/range_tick_label_font_size"
+        androidPlot.graphWidget.domainOriginLabelPaint.textSize="@dimen/domain_tick_label_font_size"
+        />
+
+    <!--<Switch
+        android:text="Configure?"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/switch1"
+        android:switchTextAppearance="@style/TextAppearance.AppCompat"
+        android:textOn='"On"'
+        android:textOff='"Off"'
+        android:checked="false"
+        android:textSize="18sp"/>
+
+    <Switch
+        android:text="Read Registers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/switch3"
+        android:textSize="18sp"/>
+
+    <Switch
+        android:text="Read Data From Temp Sensor:"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/switch2"
+        android:switchTextAppearance="@style/TextAppearance.AppCompat"
+        android:textOn='"On"'
+        android:textOff='"Off"'
+        android:checked="false"
+        android:textSize="18sp"/>-->
+
+</LinearLayout>

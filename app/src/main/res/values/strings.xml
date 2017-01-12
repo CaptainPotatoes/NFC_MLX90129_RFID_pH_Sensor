@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">MLX90129 Sensor Demo</string>
+    <!-- Default text for a button that can be toggled on and off. -->
+    <string name="capital_on">ON</string>
+    <!-- Default text for a button that can be toggled on and off. -->
+    <string name="capital_off">OFF</string>
+    <string name="yes_button">Yes</string>
+    <string name="no_button">No</string>
+    <string name="nfc_read_config">Read Current Configuration</string>
+    <string name="nfc_write_config">Set Configuration Settings</string>
+</resources>
