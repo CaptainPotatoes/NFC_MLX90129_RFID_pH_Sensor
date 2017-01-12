@@ -452,6 +452,9 @@ public class NFCCommand {
 	 //* the function will return 04 blocks read from address 0002
 	 //* According to the ISO-15693 maximum block read is 32 for the same sector
 	 //***********************************************************************/
+	 public static byte[] SendReadSingleBlockCommand (Tag myTag, byte[] StartAddress,  byte[] data) {
+		return data;
+	 }
 	 public static byte[] SendReadSingleBlockCommand (Tag myTag, byte[] StartAddress,  DataDevice ma)
 	 {
 		 byte[] response = new byte[] {(byte) 0x0A}; 
