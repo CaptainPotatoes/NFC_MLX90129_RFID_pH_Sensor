@@ -203,7 +203,7 @@ public class ViewConfig extends Activity {
                     //Data Matrix from 0→23 (i-9)
 //                    String concat = "";
                     Log.e(TAG, "EEPROM Read ["+"0x##"+"] = 0xAABB");
-                    byte[] address = {(byte) 0x1B};
+                    byte[] address = {(byte) 0x09};
                     for (int i = address[0]; i < 0x21; i++) {
                         byte[] responseRead = tranceiveReadEEPROM(nfcVTag, address[0]);
                         allEEPROMData[i-0x09] = responseRead; //Add data to matrix

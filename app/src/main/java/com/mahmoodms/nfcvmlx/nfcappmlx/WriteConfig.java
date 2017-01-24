@@ -669,7 +669,7 @@ public class WriteConfig extends Activity {
                     Log.e(TAG,"Write[0x20] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand20));
                     //WRITE:                 Tag,    address, commandBytes[A, B]
                     if(writeToDevice) {
-                        /*tranceiveWriteEEPROM(nfcVTag, (byte)0x09, writeCommand09); // DMA Configuration
+                        tranceiveWriteEEPROM(nfcVTag, (byte)0x09, writeCommand09); // DMA Configuration
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x0A, writeCommand0A); // DMA Source Start Address
                         MainActivity.delayMS(50);
@@ -702,7 +702,7 @@ public class WriteConfig extends Activity {
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x19, writeCommand19); // Sensor 0 Connection Config
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x1A, writeCommand1A); // Sensor 0 Resistance Network
-                        MainActivity.delayMS(50);*/
+                        MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x1B, writeCommand1B); // Sensor 1 Control Word
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x1C, writeCommand1C); // Sensor 1 ThreshLow

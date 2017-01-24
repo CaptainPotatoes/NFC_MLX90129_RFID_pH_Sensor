@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.androidplot.Plot;
 import com.androidplot.util.Redrawer;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
@@ -35,6 +36,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -86,20 +88,24 @@ public class MainActivity extends Activity {
         xyPlot = (XYPlot) findViewById(R.id.dataPlot);
         nfcDataSensor0 = new SimpleXYSeries("Temperature Sensor Data");
         nfcDataSensor1 = new SimpleXYSeries("pH Sensor Data");
+        nfcDataSensor0.useImplicitXVals();
+        nfcDataSensor1.useImplicitXVals();
         //Todo: Using explicit x values: (over 30s)
-        xyPlot.setDomainBoundaries(0, HISTORY_SECONDS, BoundaryMode.AUTO);
+
+        xyPlot.setRangeBoundaries(0,1.2, BoundaryMode.FIXED);
+        xyPlot.setRangeStepMode(XYStepMode.INCREMENT_BY_VAL);
+        xyPlot.setRangeStepValue(0.3);
+
+        xyPlot.setDomainBoundaries(0, HISTORY_SECONDS, BoundaryMode.FIXED);
         xyPlot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
-        xyPlot.setDomainStepValue(2);
-        //nfcData.useImplicitXVals();
-        xyPlot.setRangeBoundaries(0,16384,BoundaryMode.AUTO);
-        xyPlot.setRangeStepValue(16384/5);
+        xyPlot.setDomainStepValue(HISTORY_SECONDS/10);
 
         xyPlot.setRangeStepMode(XYStepMode.INCREMENT_BY_VAL);
         xyPlot.setDomainLabel("Time (seconds)");
         xyPlot.getDomainLabelWidget().pack();
-        xyPlot.setRangeLabel("Voltage (mV)");
+        xyPlot.setRangeLabel("Voltage (V)");
         xyPlot.getRangeLabelWidget().pack();
-        xyPlot.setRangeValueFormat(new DecimalFormat("#.###"));
+        xyPlot.setRangeValueFormat(new DecimalFormat("#.#"));
         xyPlot.setDomainValueFormat(new DecimalFormat("#"));
         xyPlot.getDomainLabelWidget().getLabelPaint().setColor(Color.BLACK);
         xyPlot.getDomainLabelWidget().getLabelPaint().setTextSize(20);
@@ -119,9 +125,12 @@ public class MainActivity extends Activity {
         LineAndPointFormatter lineAndPointFormatter1 = new LineAndPointFormatter(Color.BLACK, null, null, null);
         lineAndPointFormatter1.getLinePaint().setStrokeWidth(3);
         xyPlot.addSeries(nfcDataSensor0, lineAndPointFormatter1);
+
         LineAndPointFormatter lineAndPointFormatter2 = new LineAndPointFormatter(Color.BLUE, null, null, null);
         lineAndPointFormatter1.getLinePaint().setStrokeWidth(3);
         xyPlot.addSeries(nfcDataSensor1, lineAndPointFormatter2);
+
+        redrawer = new Redrawer(Arrays.asList(new Plot[]{xyPlot}),100,false);
 
         if(!pm.hasSystemFeature(PackageManager.FEATURE_NFC)) {
             mNFCText.setText("NFC UNAVAILABLE!");
@@ -165,13 +174,14 @@ public class MainActivity extends Activity {
     protected void onResume()
     {
         // TODO Auto-generated method stub
-        super.onResume();
+        redrawer.start();
         //Used for DEBUG : Log.v("NFCappsActivity.java", "ON RESUME NFC APPS ACTIVITY");
         mPendingIntent = PendingIntent.getActivity(this, 0,new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
         mAdapter.enableForegroundDispatch(this, mPendingIntent, mFilters, mTechLists);
         if(!logFileInitialized) {
             exportLogFile(true,"");
         }
+        super.onResume();
     }
 
     @Override
@@ -179,8 +189,15 @@ public class MainActivity extends Activity {
     {
         // TODO Auto-generated method stub
         //Used for DEBUG : Log.v("NFCappsActivity.java", "ON PAUSE NFC APPS ACTIVITY");
+        redrawer.pause();
         super.onPause();
         mAdapter.disableForegroundDispatch(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        redrawer.finish();
+        super.onDestroy();
     }
 
     private void testFunction() {
@@ -290,8 +307,8 @@ public class MainActivity extends Activity {
                     lastPlottedIndex = 0;
 
                     while (nfcVTag.isConnected()) {
+                        //TODO: CHANGE THIS TO Timer.scheduleAtFixedRate
                         if(readDataAddress.length>2) {
-
                             byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
                             if(readEEPROM.length>2) {
                                 byte[] relevantData = {readEEPROM[1],readEEPROM[2]};
@@ -304,6 +321,7 @@ public class MainActivity extends Activity {
                                     timeStampData[timeStampIndex] = bytesWordToIntAlt(timeStamp);
                                     Log.e(TAG,"INTVAL TS: "+String.valueOf(timeStampData[timeStampIndex]));
                                     exportLogFile(false, "T = "+String.valueOf(timeStampData[timeStampIndex])+"\r\n");
+                                    updateIonSensorData(3, timeStampData[timeStampIndex]);
                                     timeStampIndex++;
                                 } else if ((readEEPROM[2] & 0b11000000) == 0b01000000) {
                                     // Sensor 1 (external)
@@ -311,6 +329,7 @@ public class MainActivity extends Activity {
                                     sensor1Data[sensor1Index] = bytesWordToIntAlt(sensor1Datapoint);
                                     Log.e(TAG,"INTVAL S1: "+String.valueOf(sensor1Data[sensor1Index]));
                                     exportLogFile(false, "S1: "+String.valueOf(sensor1Data[sensor1Index])+"\r\n");
+                                    updateIonSensorData(1, sensor1Data[sensor1Index]);
                                     sensor1Index++;
                                 } else {
                                     //Sensor 0 (internal)
@@ -318,6 +337,7 @@ public class MainActivity extends Activity {
                                     sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
                                     Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
                                     exportLogFile(false, "S0: "+String.valueOf(sensor0Data[sensor0Index])+"\r\n");
+                                    updateIonSensorData(0, sensor0Data[sensor0Index]);
                                     sensor0Index++;
                                 }
 //                                Log.e(TAG, "ReadData["+ViewConfig.toHexStringLittleEndian(readDataAddress) +" ]= 0x"+ ViewConfig.toHexStringLittleEndian(relevantData));
@@ -328,46 +348,9 @@ public class MainActivity extends Activity {
                             readDataAddress[1]++;
                             //TODO: PLOT DATA:
                             //turn values into array
-                            /*runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    int[] arrayIndicies = {timeStampIndex, sensor0Index, sensor1Index};
-                                    int smallestIndex = findSmallestValue(arrayIndicies);
-                                    int largestIndex = findLargestValue(arrayIndicies);
-                                    if(smallestIndex>0) {
-                                        //have values to plot; proceed.
-                                        if(nfcDataSensor0.size()>HISTORY_SECONDS) {
-                                            nfcDataSensor0.removeFirst();
-                                        }
-                                        if(nfcDataSensor1.size()>HISTORY_SECONDS) {
-                                            nfcDataSensor1.removeFirst();
-                                            double[] maxes = {findGraphMax(nfcDataSensor0), findGraphMax(nfcDataSensor1)};
-                                            double max = findLargestValue(maxes);
-                                            double[] mins = {findGraphMin(nfcDataSensor0), findGraphMin(nfcDataSensor1)};
-                                            double min = findSmallestValue(mins);
-                                            if(max-min!=0) {
-                                                if(currentBM!=BoundaryMode.AUTO) {
-                                                    xyPlot.setRangeBoundaries(-16384, 16384, BoundaryMode.AUTO);
-                                                    currentBM = BoundaryMode.AUTO;
-                                                }
-                                            } else {
-                                                if(currentBM!=BoundaryMode.FIXED) {
-                                                    xyPlot.setRangeBoundaries(min-10, max+10, BoundaryMode.FIXED);
-                                                }
-                                                xyPlot.setRangeStepValue(20/5);
-                                            }
-                                        }
-                                        for (int i = lastPlottedIndex; i < smallestIndex; i++) {
-                                            if(i<99) {
-                                                nfcDataSensor0.addLast(timeStampData[i], sensor0Data[i]);
-                                                nfcDataSensor1.addLast(timeStampData[i], sensor1Data[i]);
-                                            }
-                                        }
-                                    }
-                                    lastPlottedIndex = smallestIndex;
-                                }
-                            });*/
                         }
+                        //TODO: Make this variable based on the timer settings programmed.
+                            //Will need to read these settings first.
                         delayMS(400);
                     }
                     //Get values (Timestamp, Sensor 0, Sensor 1)
@@ -379,6 +362,33 @@ public class MainActivity extends Activity {
         }
     }
 
+    private double dataVoltage = 0;
+
+    private void updateIonSensorData(final int sensor, final int value){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(sensor==0) {
+                    if(nfcDataSensor0.size()>HISTORY_SECONDS) {
+                        nfcDataSensor0.removeFirst();
+                    }
+                    double temp = (double)value/16384;
+                    dataVoltage = (temp*1.2);
+                    nfcDataSensor0.addLast(null, dataVoltage);
+                } else if(sensor==1) {
+                    if(nfcDataSensor1.size()>HISTORY_SECONDS) {
+                        nfcDataSensor1.removeFirst();
+                    }
+                    double temp = (double)value/16384;
+                    dataVoltage = (temp*1.2);
+                    nfcDataSensor1.addLast(null, dataVoltage);
+                } else {
+                    //3 is timestamps.
+                    //Unused for the timebeing.
+                }
+            }
+        });
+    }
     private boolean startedGraphingData = false;
     private boolean initExecutor = false;
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
@@ -438,7 +448,6 @@ public class MainActivity extends Activity {
         }
     }
 
-//    protected byte[] tranceiveWriteInternal(NfcV nfcVTag, byte addr, byte[] data) {
     protected byte[] tranceiveReadInternal(NfcV nfcVTag, byte addr) {
         byte[] response = {(byte)0xFF};
         try{
