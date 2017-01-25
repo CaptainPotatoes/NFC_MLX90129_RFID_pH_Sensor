@@ -38,6 +38,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.TimerTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -271,7 +272,7 @@ public class MainActivity extends Activity {
             mNFCText.setText(hexID);
             for (String s:mCurrentTag.getTechList()) {
                 if(s.equals(NfcV.class.getName())) {
-                    NfcV nfcVTag = NfcV.get(mCurrentTag);
+                    final NfcV nfcVTag = NfcV.get(mCurrentTag);
                     try {
                         nfcVTag.connect();
                     } catch (IOException e) {
@@ -288,12 +289,12 @@ public class MainActivity extends Activity {
                         Log.e(TAG,Boolean.toString(timestampsEnabled)+" "+Boolean.toString(sensor0Enabled)+" "+Boolean.toString(sensor1Enabled));
                     }*/
                     exportLogFile(false, "Connected at: "+getTimeStamp()+"\r\n");
-                    if(!timestampsEnabled) {
+                    /*if(!timestampsEnabled) {
                         //TODO: USE IMPLICIT X VALUES!
-                    }
+                    }*/
                     //Check which address they are being stored at:
                     //delayMS(20);
-                    byte[] readDataAddress = tranceiveReadInternal(nfcVTag, (byte)0x05);
+                    final byte[] readDataAddress = tranceiveReadInternal(nfcVTag, (byte)0x05);
                     delayMS(20);
                     Log.e(TAG, "readDataAddress = 0x"+ViewConfig.toHexStringBigEndian(readDataAddress));
                     if(readDataAddress.length>2) {
@@ -301,58 +302,61 @@ public class MainActivity extends Activity {
                         Log.e("byte 2:",Integer.toHexString((int) readDataAddress[1]));
                         Log.e("byte 3:",Integer.toHexString((int) readDataAddress[2]));
                     }
+
                     timeStampIndex = 0;
                     sensor0Index = 0;
                     sensor1Index = 0;
                     lastPlottedIndex = 0;
 
-                    while (nfcVTag.isConnected()) {
-                        //TODO: CHANGE THIS TO Timer.scheduleAtFixedRate
-                        if(readDataAddress.length>2) {
-                            byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
-                            if(readEEPROM.length>2) {
-                                byte[] relevantData = {readEEPROM[1],readEEPROM[2]};
-                                if((readEEPROM[2] & 0b11000000) == 0b11000000) {
-                                    //timestamp //Todo: use 0b00 bitmask to convert to correct values:
-//                                    byte unmaskedMSB = (byte)(readEEPROM[2] & 0b00111111);
-//                                    byte[] timeStamp = {readEEPROM[1], unmaskedMSB};
-                                    byte[] timeStamp = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-//                                    int timeStampInt = bytesWordToIntAlt(timeStamp);
-                                    timeStampData[timeStampIndex] = bytesWordToIntAlt(timeStamp);
-                                    Log.e(TAG,"INTVAL TS: "+String.valueOf(timeStampData[timeStampIndex]));
-                                    exportLogFile(false, "T = "+String.valueOf(timeStampData[timeStampIndex])+"\r\n");
-                                    updateIonSensorData(3, timeStampData[timeStampIndex]);
-                                    timeStampIndex++;
-                                } else if ((readEEPROM[2] & 0b11000000) == 0b01000000) {
-                                    // Sensor 1 (external)
-                                    byte[] sensor1Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-                                    sensor1Data[sensor1Index] = bytesWordToIntAlt(sensor1Datapoint);
-                                    Log.e(TAG,"INTVAL S1: "+String.valueOf(sensor1Data[sensor1Index]));
-                                    exportLogFile(false, "S1: "+String.valueOf(sensor1Data[sensor1Index])+"\r\n");
-                                    updateIonSensorData(1, sensor1Data[sensor1Index]);
-                                    sensor1Index++;
+                    class graphData implements Runnable {
+                        @Override
+                        public void run() {
+                            if(readDataAddress.length>2) {
+                                byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
+                                if(readEEPROM.length>2) {
+                                    byte[] relevantData = {readEEPROM[1],readEEPROM[2]};
+                                    if((readEEPROM[2] & 0b11000000) == 0b11000000) {
+                                        //timestamp //Todo: use 0b00 bitmask to convert to correct values:
+                                        byte[] timeStamp = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
+                                        timeStampData[timeStampIndex] = bytesWordToIntAlt(timeStamp);
+                                        Log.e(TAG,"INTVAL TS: "+String.valueOf(timeStampData[timeStampIndex]));
+                                        exportLogFile(false, "T = "+String.valueOf(timeStampData[timeStampIndex])+"\r\n");
+                                        updateIonSensorData(3, timeStampData[timeStampIndex]);
+                                        timeStampIndex++;
+                                    } else if ((readEEPROM[2] & 0b11000000) == 0b01000000) {
+                                        // Sensor 1 (external)
+                                        byte[] sensor1Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
+                                        sensor1Data[sensor1Index] = bytesWordToIntAlt(sensor1Datapoint);
+                                        Log.e(TAG,"INTVAL S1: "+String.valueOf(sensor1Data[sensor1Index]));
+                                        exportLogFile(false, "S1: "+String.valueOf(sensor1Data[sensor1Index])+"\r\n");
+                                        updateIonSensorData(1, sensor1Data[sensor1Index]);
+                                        sensor1Index++;
+                                    } else {
+                                        //Sensor 0 (internal)
+                                        byte[] sensor0Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
+                                        sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
+                                        Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
+                                        exportLogFile(false, "S0: "+String.valueOf(sensor0Data[sensor0Index])+"\r\n");
+                                        updateIonSensorData(0, sensor0Data[sensor0Index]);
+                                        sensor0Index++;
+                                    }
                                 } else {
-                                    //Sensor 0 (internal)
-                                    byte[] sensor0Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-                                    sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
-                                    Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
-                                    exportLogFile(false, "S0: "+String.valueOf(sensor0Data[sensor0Index])+"\r\n");
-                                    updateIonSensorData(0, sensor0Data[sensor0Index]);
-                                    sensor0Index++;
+                                    Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
+                                    exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
                                 }
-//                                Log.e(TAG, "ReadData["+ViewConfig.toHexStringLittleEndian(readDataAddress) +" ]= 0x"+ ViewConfig.toHexStringLittleEndian(relevantData));
-                            } else {
-                                Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
-                                exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
+                                readDataAddress[1]++;
                             }
-                            readDataAddress[1]++;
-                            //TODO: PLOT DATA:
-                            //turn values into array
                         }
-                        //TODO: Make this variable based on the timer settings programmed.
-                            //Will need to read these settings first.
-                        delayMS(400);
                     }
+
+//                    if(!startedGraphingData) {
+                    if(!initExecutor) {
+                        //TODO: Change (350) to a variable, so the app is more modular.
+                        executor.scheduleAtFixedRate(new graphData(), 0, 350, TimeUnit.MILLISECONDS);
+                        initExecutor = true;
+                    }
+//                    }
+
                     //Get values (Timestamp, Sensor 0, Sensor 1)
                     //Write to Drive (use code from ECG)
                     //Sequentially plot points as received [timestamp, sensor]
@@ -396,8 +400,8 @@ public class MainActivity extends Activity {
         startedGraphingData = false;
     }
 
-    private void startReceiveDataAndGraph() {
-        executor.scheduleAtFixedRate(new retrieveDataAndGraph(), 0, 1000, TimeUnit.MILLISECONDS);
+    private void startGraph() {
+//        executor.scheduleAtFixedRate(new graphData(), 0, 1000, TimeUnit.MILLISECONDS);
         startedGraphingData = true;
     }
 
