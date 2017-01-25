@@ -311,40 +311,42 @@ public class MainActivity extends Activity {
                     class graphData implements Runnable {
                         @Override
                         public void run() {
-                            if(readDataAddress.length>2) {
-                                byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
-                                if(readEEPROM.length>2) {
-                                    byte[] relevantData = {readEEPROM[1],readEEPROM[2]};
-                                    if((readEEPROM[2] & 0b11000000) == 0b11000000) {
-                                        //timestamp //Todo: use 0b00 bitmask to convert to correct values:
-                                        byte[] timeStamp = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-                                        timeStampData[timeStampIndex] = bytesWordToIntAlt(timeStamp);
-                                        Log.e(TAG,"INTVAL TS: "+String.valueOf(timeStampData[timeStampIndex]));
-                                        exportLogFile(false, "T = "+String.valueOf(timeStampData[timeStampIndex])+"\r\n");
-                                        updateIonSensorData(3, timeStampData[timeStampIndex]);
-                                        timeStampIndex++;
-                                    } else if ((readEEPROM[2] & 0b11000000) == 0b01000000) {
-                                        // Sensor 1 (external)
-                                        byte[] sensor1Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-                                        sensor1Data[sensor1Index] = bytesWordToIntAlt(sensor1Datapoint);
-                                        Log.e(TAG,"INTVAL S1: "+String.valueOf(sensor1Data[sensor1Index]));
-                                        exportLogFile(false, "S1: "+String.valueOf(sensor1Data[sensor1Index])+"\r\n");
-                                        updateIonSensorData(1, sensor1Data[sensor1Index]);
-                                        sensor1Index++;
+                            if(nfcVTag.isConnected()) {
+                                if(readDataAddress.length>2) {
+                                    byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
+                                    if(readEEPROM.length>2) {
+                                        byte[] relevantData = {readEEPROM[1],readEEPROM[2]};
+                                        if((readEEPROM[2] & 0b11000000) == 0b11000000) {
+                                            //timestamp //Todo: use 0b00 bitmask to convert to correct values:
+                                            byte[] timeStamp = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
+                                            timeStampData[timeStampIndex] = bytesWordToIntAlt(timeStamp);
+                                            Log.e(TAG,"INTVAL TS: "+String.valueOf(timeStampData[timeStampIndex]));
+                                            exportLogFile(false, "T = "+String.valueOf(timeStampData[timeStampIndex])+"\r\n");
+                                            updateIonSensorData(3, timeStampData[timeStampIndex]);
+                                            timeStampIndex++;
+                                        } else if ((readEEPROM[2] & 0b11000000) == 0b01000000) {
+                                            // Sensor 1 (external)
+                                            byte[] sensor1Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
+                                            sensor1Data[sensor1Index] = bytesWordToIntAlt(sensor1Datapoint);
+                                            Log.e(TAG,"INTVAL S1: "+String.valueOf(sensor1Data[sensor1Index]));
+                                            exportLogFile(false, "S1: "+String.valueOf(sensor1Data[sensor1Index])+"\r\n");
+                                            updateIonSensorData(1, sensor1Data[sensor1Index]);
+                                            sensor1Index++;
+                                        } else {
+                                            //Sensor 0 (internal)
+                                            byte[] sensor0Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
+                                            sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
+                                            Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
+                                            exportLogFile(false, "S0: "+String.valueOf(sensor0Data[sensor0Index])+"\r\n");
+                                            updateIonSensorData(0, sensor0Data[sensor0Index]);
+                                            sensor0Index++;
+                                        }
                                     } else {
-                                        //Sensor 0 (internal)
-                                        byte[] sensor0Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-                                        sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
-                                        Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
-                                        exportLogFile(false, "S0: "+String.valueOf(sensor0Data[sensor0Index])+"\r\n");
-                                        updateIonSensorData(0, sensor0Data[sensor0Index]);
-                                        sensor0Index++;
+                                        Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
+                                        exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
                                     }
-                                } else {
-                                    Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
-                                    exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
+                                    readDataAddress[1]++;
                                 }
-                                readDataAddress[1]++;
                             }
                         }
                     }
