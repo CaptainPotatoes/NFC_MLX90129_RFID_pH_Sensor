@@ -225,7 +225,8 @@ public class MainActivity extends Activity {
             root = Environment.getExternalStorageDirectory();
             File dir = new File(root+"/RFIDDataLogs");
             boolean mkdirsA = dir.mkdirs();
-            logFile = new File(dir,"Log_"+getTimeStamp()+".txt");
+            logFile = new File(dir,"Log_"+getTimeStamp()+".csv");
+//            logFile = new File(dir,"Log_"+getTimeStamp()+".txt");
             if (!logFile.exists()) {
                 try {
                     logFile.createNewFile();
@@ -288,7 +289,7 @@ public class MainActivity extends Activity {
                         sensor1Enabled = ( (dmaConfig[2] & 0b00100000) == 0b00100000);
                         Log.e(TAG,Boolean.toString(timestampsEnabled)+" "+Boolean.toString(sensor0Enabled)+" "+Boolean.toString(sensor1Enabled));
                     }*/
-                    exportLogFile(false, "Connected at: "+getTimeStamp()+"\r\n");
+//                    exportLogFile(false, "Connected at: "+getTimeStamp()+"\r\n");
                     /*if(!timestampsEnabled) {
                         //TODO: USE IMPLICIT X VALUES!
                     }*/
@@ -321,7 +322,7 @@ public class MainActivity extends Activity {
                                             byte[] timeStamp = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
                                             timeStampData[timeStampIndex] = bytesWordToIntAlt(timeStamp);
                                             Log.e(TAG,"INTVAL TS: "+String.valueOf(timeStampData[timeStampIndex]));
-                                            exportLogFile(false, "T = "+String.valueOf(timeStampData[timeStampIndex])+"\r\n");
+//                                            exportLogFile(false, "T = "+String.valueOf(timeStampData[timeStampIndex])+"\r\n");
                                             updateIonSensorData(3, timeStampData[timeStampIndex]);
                                             timeStampIndex++;
                                         } else if ((readEEPROM[2] & 0b11000000) == 0b01000000) {
@@ -329,7 +330,9 @@ public class MainActivity extends Activity {
                                             byte[] sensor1Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
                                             sensor1Data[sensor1Index] = bytesWordToIntAlt(sensor1Datapoint);
                                             Log.e(TAG,"INTVAL S1: "+String.valueOf(sensor1Data[sensor1Index]));
-                                            exportLogFile(false, "S1: "+String.valueOf(sensor1Data[sensor1Index])+"\r\n");
+                                            double temp = (double)bytesWordToIntAlt(sensor1Datapoint)/16384;
+                                            double voltFinal = temp*1.2;
+                                            exportLogFile(false,String.valueOf(voltFinal)+"\r");
                                             updateIonSensorData(1, sensor1Data[sensor1Index]);
                                             sensor1Index++;
                                         } else {
@@ -337,13 +340,13 @@ public class MainActivity extends Activity {
                                             byte[] sensor0Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
                                             sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
                                             Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
-                                            exportLogFile(false, "S0: "+String.valueOf(sensor0Data[sensor0Index])+"\r\n");
+//                                            exportLogFile(false, "S0: "+String.valueOf(sensor0Data[sensor0Index])+"\r\n");
                                             updateIonSensorData(0, sensor0Data[sensor0Index]);
                                             sensor0Index++;
                                         }
                                     } else {
                                         Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
-                                        exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
+//                                        exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
                                     }
                                     readDataAddress[1]++;
                                 }
