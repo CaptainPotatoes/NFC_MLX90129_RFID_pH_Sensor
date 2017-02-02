@@ -78,7 +78,7 @@ public class WriteConfig extends Activity {
     private int writeFromLocation = 0;
     private int writeToLocation = 1;
     private boolean timerStandby = true;
-    private int timerUnits = 2;
+    private int timerUnits = 3;
     private int sensor0ADC = 2;
     private int sensor1ADC = 2;
 //    private RadioGroup mRadioGroupWriteDataFrom;
@@ -167,244 +167,31 @@ public class WriteConfig extends Activity {
     protected void testConfig() {
         //TODO: TEST HERE, THEN COPY TO onNewIntent()
         //Paste code here to test with onCreate:
-        byte[] writeCommand09 = new byte[2];
-        //Byte B:
-        if(enableTimeStamps) {
-            writeCommand09[1] = (byte)(writeCommand09[1] | 0b10000000);
-        }
-        if(enableSensor0) {
-            writeCommand09[1] = (byte)(writeCommand09[1] | 0b00010000);
-        }
-        if(enableSensor1) {
-            writeCommand09[1] = (byte)(writeCommand09[1] | 0b00100000);
-        }
-        //Byte A:
-        if(writeToLocation==0) {
-            writeCommand09[0] = (byte)(writeCommand09[0] | 0b11000000);
-        } else if (writeToLocation==1) {
-            writeCommand09[0] = (byte)(writeCommand09[0] | 0b01000000);
-        } else if (writeToLocation==3) {
-            writeCommand09[0] = (byte)(writeCommand09[0] | 0b10000000);
-        } //else do nothing
 
-        if(writeFromLocation==0) {
-            writeCommand09[0] = (byte)(writeCommand09[0] | 0b00110000);
-        } else if (writeFromLocation==1) {
-            writeCommand09[0] = (byte)(writeCommand09[0] | 0b00010000);
-        } else if (writeFromLocation==3) {
-            writeCommand09[0] = (byte)(writeCommand09[0] | 0b00100000);
-        } //else do nothing
-
-        if(!manualDMA) {
-            writeCommand09[0] = (byte)(writeCommand09[0] | 0b00000001);
-        }
-        //command: [0] is bits 0→7, and [1] is bits 8→15
-        Log.e(TAG, "0x09 Command: "+ ViewConfig.toHexStringBigEndian(writeCommand09));
-        byte[] writeCommand0A = {(byte)0x00, (byte)0x00};
-        byte[] writeCommand0B = {(byte)0x00, (byte)0x00};
-        byte[] writeCommand0C = {(byte)0x00, (byte)0x00};
-        byte[] writeCommand0D = {(byte)0x00, (byte)0x00};
-        byte[] writeCommand0E = {(byte)0x00, (byte)0x00};
-        byte[] writeCommand0F = new byte[2];
-        byte[] writeCommand10 = {(byte)0x00, (byte)0x00};
-        byte[] writeCommand12 = {(byte)0xFF, (byte)0x00}; //Default Sensor Power Config
-        byte[] writeCommand14 = {(byte)0x00, (byte)0x00}; //Default Sensor trimming
-        byte[] writeCommand15 = {(byte)0x71, (byte)0x00}; //Default Sensor 0 Control word:
-        byte[] writeCommand16 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
-        byte[] writeCommand17 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
-        byte[] writeCommand18 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Conditioner Config
-        byte[] writeCommand19 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Connection Config
-        byte[] writeCommand1A = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Resistance Network
-        byte[] writeCommand1B = {(byte)0x71, (byte)0x00}; //Default Sensor 1 Control word: (same default config)
-        byte[] writeCommand1C = {(byte)0x00, (byte)0x00}; //Default Sensor 1 threshold (0):
-        byte[] writeCommand1D = {(byte)0x00, (byte)0x00}; //Default Sensor 1 threshold (0):
-        byte[] writeCommand1E = {(byte)0x00, (byte)0x00}; //Default Sensor 1 Conditioner Config
-        byte[] writeCommand1F = {(byte)0x00, (byte)0x00}; //Default Sensor 1 Connection Config
-        byte[] writeCommand20 = {(byte)0x00, (byte)0x00}; //Default Sensor 1 Resistance Network
-        // Store all samples; mean of 2 samples A: [0 1 1 1 0 0 1 1] B: [00000000]
-        if(defaultDMASettings) {
-            if(writeFromLocation==0) {
-                writeCommand0A[0] = (byte) 0x00; writeCommand0A[1] = (byte) 0x00;
-            }
-            if(writeToLocation==1) {
-                writeCommand0B[0] = (byte)0x29; writeCommand0B[1] = (byte) 0x00;
-                writeCommand0C[0] = (byte)0xD7; writeCommand0C[1] = (byte) 0x00;
-            }
-        }
-        String s1 = mEditTextTimerCountdown.getText().toString();
-        int parsedInt = Integer.parseInt(s1);
-        if(parsedInt<65535 && parsedInt>0) {
-            writeCommand0F = swap2Bytes(intTo2Bytes(parsedInt)); //SWAPPED FOR PROGRAMMING!
-            byte[] byte0 = {writeCommand0F[0]}; //byte A
-            byte[] byte1 = {writeCommand0F[1]}; //byte B
-            Log.e(TAG, "byte0: "+ ViewConfig.toHexStringBigEndian(byte0));
-            Log.e(TAG, "byte1: "+ ViewConfig.toHexStringBigEndian(byte1));
-            Log.e(TAG,"bytes[0][1] Hex: parsedBytes: 0x"+ViewConfig.toHexStringBigEndian(writeCommand0F));
-        } else {
-            Toast.makeText(getApplicationContext(), "Timer Period Invalid\nMust be between 1 and 65535", Toast.LENGTH_SHORT).show();
-        }
-        //TODO: When I have time: SPI
-
-
-        //Timer Control
-        //standby enable?
-        if(timerStandby) {
-            writeCommand10[0] |= (byte)0b00001000;
-        } //else do nothing
-        if(automaticDataLoggingTimer) {
-            writeCommand10[0] |= (byte)0b00000100;
-        } else {
-            writeCommand10[0] |= (byte)0b00000000;
-        }
-        //Timer IRQ
-        if(timerIRQ) {
-            writeCommand10[0] |= (byte)0b00000001;
-        }
-        switch (timerUnits) {
-            case 0:
-                writeCommand10[0] |= (byte)0b00110000;
-                break;
-            case 1:
-                writeCommand10[0] |= (byte)0b00100000;
-                break;
-            case 2:
-                writeCommand10[0] |= (byte)0b00010000;
-                break;
-            case 3:
-                writeCommand10[0] |= (byte)0b00000000;
-                break;
-        }
-
-        if(sensor0LowPowerMode) {
-            writeCommand15[0] |= 0b10000000;
-        }
-
-        switch (sensor0ADC) {
-            case 4: //slowest
-                writeCommand15[1] |= 0b11000000;
-                break;
-            case 3:
-                writeCommand15[1] |= 0b10000000;
-                break;
-            case 2:
-                writeCommand15[1] |= 0b01000000;
-                break;
-            case 1: //fastest
-//                            writeCommand15[1] |= 0b00000000;
-                break;
-        }
-        if(sensor0Chopper) {
-            writeCommand16[1] |= 0b10000000;
-        }
-        if(sensor0Mux) {
-            String s2 = mEditTextSensor0Mux.getText().toString();
-            try {
-                int parsedHex = Integer.parseInt(s2, 16);//561
-                Log.e(TAG,"Int: parsedInt: "+String.valueOf(parsedHex));
-                writeCommand19 = swap2Bytes(intTo2Bytes(parsedHex)); //SWAPPED
-                byte[] byte2 = {writeCommand19[0]};
-                byte[] byte3 = {writeCommand19[1]};
-                Log.e(TAG, "Sensor 0 Connection Config byte0(A): "+ ViewConfig.toHexStringBigEndian(byte2));
-                Log.e(TAG, "Sensor 0 Connection Config byte1: "+ ViewConfig.toHexStringBigEndian(byte3));
-            } catch (NumberFormatException e) {
-                Log.e(TAG,"Not Valid Hex (Sensor 0)");
-                Toast.makeText(getApplicationContext(), "Not Valid Hex (Sensor 0 Connection Config)", Toast.LENGTH_SHORT).show();
-            }
-        }
-        if(sensor0Resistance) {
-            String s2 = mEditTextSensor0Resistance.getText().toString();
-            try {
-                int parsedHex = Integer.parseInt(s2, 16);//561
-                Log.e(TAG,"Int: parsedInt: "+String.valueOf(parsedHex));
-                writeCommand1A = swap2Bytes(intTo2Bytes(parsedHex)); //SWAPPED
-                byte[] byte2 = {writeCommand1A[0]};
-                byte[] byte3 = {writeCommand1A[1]};
-                Log.e(TAG, "Sensor 0 Resistance Config byte0(A): "+ ViewConfig.toHexStringBigEndian(byte2));
-                Log.e(TAG, "Sensor 0 Resistance Config byte1: "+ ViewConfig.toHexStringBigEndian(byte3));
-            } catch (NumberFormatException e) {
-                Log.e(TAG,"Not Valid Hex (Sensor 0 Resistance)");
-                Toast.makeText(getApplicationContext(), "Not Valid Hex (Sensor 0 Resistance)", Toast.LENGTH_SHORT).show();
-            }
-        }
-        if(enableSensor0) {
-            writeCommand1A[1] |= 0b10000000;
-        }
-        if(sensor1LowPowerMode) {
-            writeCommand1B[0] |= 0b10000000;
-        }
-        switch (sensor1ADC) {
-            case 4: //slowest
-                writeCommand1B[1] |= 0b11000000;
-                break;
-            case 3:
-                writeCommand1B[1] |= 0b10000000;
-                break;
-            case 2:
-                writeCommand1B[1] |= 0b01000000;
-                break;
-            case 1: //fastest
-//                            writeCommand15[1] |= 0b00000000;
-                break;
-        }
-        if(sensor1Chopper) {
-            writeCommand1E[1] |= 0b10000000;
-        }
-        if(sensor1Mux) {
-            String s3 = mEditTextSensor1Mux.getText().toString();
-            try {
-                int parsedHex = Integer.parseInt(s3, 16);
-                Log.e(TAG,"Int: parsedInt: "+String.valueOf(parsedHex));
-                writeCommand1F = swap2Bytes(intTo2Bytes(parsedHex));
-                byte[] byte2 = {writeCommand1F[0]};
-                byte[] byte3 = {writeCommand1F[1]};
-                Log.e(TAG, "Sensor 1 Connection Config byte0(A): "+ ViewConfig.toHexStringBigEndian(byte2));
-                Log.e(TAG, "Sensor 1 Connection Config byte1: "+ ViewConfig.toHexStringBigEndian(byte3));
-            } catch (NumberFormatException e) {
-                Log.e(TAG,"Not Valid Hex (Sensor 1)");
-                Toast.makeText(getApplicationContext(), "Not Valid Hex (Sensor 1 Connection Config)", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        if(sensor1Resistance) {
-            String s2 = mEditTextSensor1Resistance.getText().toString();
-            try {
-                int parsedHex = Integer.parseInt(s2, 16);
-                Log.e(TAG,"Int: parsedInt: "+String.valueOf(parsedHex));
-                writeCommand20 = swap2Bytes(intTo2Bytes(parsedHex)); //SWAPPED
-                byte[] byte2 = {writeCommand20[0]};
-                byte[] byte3 = {writeCommand20[1]};
-                Log.e(TAG, "Sensor 1 Resistance Config byte0(A): "+ ViewConfig.toHexStringBigEndian(byte2));
-                Log.e(TAG, "Sensor 1 Resistance Config byte1: "+ ViewConfig.toHexStringBigEndian(byte3));
-                Log.e(TAG, "Sensor 1 Resistance Config Full: "+ViewConfig.toHexStringBigEndian(writeCommand20));
-            } catch (NumberFormatException e) {
-                Log.e(TAG,"Not Valid Hex (Sensor 1 Resistance)");
-                Toast.makeText(getApplicationContext(), "Not Valid Hex (Sensor 1 Resistance)", Toast.LENGTH_SHORT).show();
-            }
-        }
         //VERIFY VIA LOGGING:
         Log.e(TAG,"Write[0x##] = 0xAABB - In order they are programmed");
-        Log.e(TAG,"Write[0x09] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand09));
-        Log.e(TAG,"Write[0x0A] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0A));
-        Log.e(TAG,"Write[0x0B] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0B));
-        Log.e(TAG,"Write[0x0C] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0C));
-        Log.e(TAG,"Write[0x0D] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0D));
-        Log.e(TAG,"Write[0x0E] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0E));
-        Log.e(TAG,"Write[0x0F] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0F));
-        Log.e(TAG,"Write[0x10] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand10));
-        Log.e(TAG,"Write[0x12] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand12));
-        Log.e(TAG,"Write[0x14] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand14));
-        Log.e(TAG,"Write[0x15] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand15));
-        Log.e(TAG,"Write[0x16] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand16));
-        Log.e(TAG,"Write[0x17] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand17));
-        Log.e(TAG,"Write[0x18] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand18));
-        Log.e(TAG,"Write[0x19] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand19));
-        Log.e(TAG,"Write[0x1A] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1A));
-        Log.e(TAG,"Write[0x1B] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1B));
-        Log.e(TAG,"Write[0x1C] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1C));
-        Log.e(TAG,"Write[0x1D] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1D));
-        Log.e(TAG,"Write[0x1E] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1E));
-        Log.e(TAG,"Write[0x1F] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1F));
-        Log.e(TAG,"Write[0x20] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand20));
+//        Log.e(TAG,"Write[0x09] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand09));
+//        Log.e(TAG,"Write[0x0A] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0A));
+//        Log.e(TAG,"Write[0x0B] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0B));
+//        Log.e(TAG,"Write[0x0C] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0C));
+//        Log.e(TAG,"Write[0x0D] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0D));
+//        Log.e(TAG,"Write[0x0E] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0E));
+//        Log.e(TAG,"Write[0x0F] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand0F));
+//        Log.e(TAG,"Write[0x10] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand10));
+//        Log.e(TAG,"Write[0x12] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand12));
+//        Log.e(TAG,"Write[0x14] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand14));
+//        Log.e(TAG,"Write[0x15] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand15));
+//        Log.e(TAG,"Write[0x16] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand16));
+//        Log.e(TAG,"Write[0x17] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand17));
+//        Log.e(TAG,"Write[0x18] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand18));
+//        Log.e(TAG,"Write[0x19] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand19));
+//        Log.e(TAG,"Write[0x1A] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1A));
+//        Log.e(TAG,"Write[0x1B] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1B));
+//        Log.e(TAG,"Write[0x1C] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1C));
+//        Log.e(TAG,"Write[0x1D] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1D));
+//        Log.e(TAG,"Write[0x1E] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1E));
+//        Log.e(TAG,"Write[0x1F] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1F));
+//        Log.e(TAG,"Write[0x20] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand20));
     }
 
     @Override
@@ -429,8 +216,11 @@ public class WriteConfig extends Activity {
                     //TODO: CONFIGURATION:
                     byte[] writeCommand09 = new byte[2];
                     //Byte B:
+                    Log.e(TAG,"ENABLE TIMESTAMPS = "+String.valueOf(enableTimeStamps));
                     if(enableTimeStamps) {
-                        writeCommand09[1] = (byte)(writeCommand09[1] | 0b10000000);
+                        writeCommand09[1] |= 0b10000000;
+                    } else {
+                        writeCommand09[1] |= 0b00000000;
                     }
                     if(enableSensor0) {
                         writeCommand09[1] = (byte)(writeCommand09[1] | 0b00010000);
@@ -468,7 +258,7 @@ public class WriteConfig extends Activity {
                     byte[] writeCommand0F = new byte[2];
                     byte[] writeCommand10 = {(byte)0x00, (byte)0x00};
                     byte[] writeCommand12 = {(byte)0xFF, (byte)0x00}; //Default Sensor Power Config
-                    byte[] writeCommand14 = {(byte)0x00, (byte)0x00}; //Default Sensor trimming
+                    byte[] writeCommand14 = {(byte)0x01, (byte)0x00}; //Default Sensor trimming
                     byte[] writeCommand15 = {(byte)0x71, (byte)0x00}; //Default Sensor 0 Control word:
                     byte[] writeCommand16 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand17 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
@@ -675,45 +465,45 @@ public class WriteConfig extends Activity {
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x0B, writeCommand0B); // DMA Destination Start Address
                         MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x0C, writeCommand0C); // DMA Processing Length
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x0D, writeCommand0D); // SPI Config
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x0E, writeCommand0E); // SPI Command Codes
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x0F, writeCommand0F); // Timer Period
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x10, writeCommand10); // Timer Control
-                        MainActivity.delayMS(50);
-
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x12, writeCommand12); // Sensor Power Configuration
-                        MainActivity.delayMS(50);
-
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x14, writeCommand14); // Sensor  Trimming
-                        MainActivity.delayMS(50);
-                       tranceiveWriteEEPROM(nfcVTag, (byte)0x15, writeCommand15); // Sensor 0 Control Word
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x16, writeCommand16); // Sensor 0 ThreshLow
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x17, writeCommand17); // Sensor 0 ThreshHigh
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x18, writeCommand18); // Sensor 0 Conditioner Config
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x19, writeCommand19); // Sensor 0 Connection Config
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1A, writeCommand1A); // Sensor 0 Resistance Network
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1B, writeCommand1B); // Sensor 1 Control Word
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1C, writeCommand1C); // Sensor 1 ThreshLow
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1D, writeCommand1D); // Sensor 1 ThreshHigh
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1E, writeCommand1E); // Sensor 1 Conditioner Config
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1F, writeCommand1F); // Sensor 1 Connection Config
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x20, writeCommand20); // Sensor 1 Resistance Network
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x0C, writeCommand0C); // DMA Processing Length
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x0D, writeCommand0D); // SPI Config
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x0E, writeCommand0E); // SPI Command Codes
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x0F, writeCommand0F); // Timer Period
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x10, writeCommand10); // Timer Control
+//                        MainActivity.delayMS(50);
+//
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x12, writeCommand12); // Sensor Power Configuration
+//                        MainActivity.delayMS(50);
+//
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x14, writeCommand14); // Sensor  Trimming
+//                        MainActivity.delayMS(50);
+//                       tranceiveWriteEEPROM(nfcVTag, (byte)0x15, writeCommand15); // Sensor 0 Control Word
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x16, writeCommand16); // Sensor 0 ThreshLow
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x17, writeCommand17); // Sensor 0 ThreshHigh
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x18, writeCommand18); // Sensor 0 Conditioner Config
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x19, writeCommand19); // Sensor 0 Connection Config
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1A, writeCommand1A); // Sensor 0 Resistance Network
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1B, writeCommand1B); // Sensor 1 Control Word
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1C, writeCommand1C); // Sensor 1 ThreshLow
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1D, writeCommand1D); // Sensor 1 ThreshHigh
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1E, writeCommand1E); // Sensor 1 Conditioner Config
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1F, writeCommand1F); // Sensor 1 Connection Config
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x20, writeCommand20); // Sensor 1 Resistance Network
                     }
 
                     //TODO: Set condition for checking if SPI is available, then ungrey using [mCheckBoxSPI.setEnabled(true);]

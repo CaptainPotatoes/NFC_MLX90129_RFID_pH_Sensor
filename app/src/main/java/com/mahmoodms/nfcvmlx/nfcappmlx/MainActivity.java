@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.NfcB;
 import android.nfc.tech.NfcV;
 import android.os.Bundle;
 import android.os.Environment;
@@ -69,6 +68,7 @@ public class MainActivity extends Activity {
     private Button mButtonTempMain;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
+    private int timerPeriod = 120;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -294,7 +294,6 @@ public class MainActivity extends Activity {
                         //TODO: USE IMPLICIT X VALUES!
                     }*/
                     //Check which address they are being stored at:
-                    //delayMS(20);
                     final byte[] readDataAddress = tranceiveReadInternal(nfcVTag, (byte)0x05);
                     delayMS(20);
                     Log.e(TAG, "readDataAddress = 0x"+ViewConfig.toHexStringBigEndian(readDataAddress));
@@ -308,7 +307,7 @@ public class MainActivity extends Activity {
                     sensor0Index = 0;
                     sensor1Index = 0;
                     lastPlottedIndex = 0;
-
+//                    readDataAddress[1] = (byte) 0x29;
                     class graphData implements Runnable {
                         @Override
                         public void run() {
@@ -316,7 +315,6 @@ public class MainActivity extends Activity {
                                 if(readDataAddress.length>2) {
                                     byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
                                     if(readEEPROM.length>2) {
-                                        byte[] relevantData = {readEEPROM[1],readEEPROM[2]};
                                         if((readEEPROM[2] & 0b11000000) == 0b11000000) {
                                             //timestamp //Todo: use 0b00 bitmask to convert to correct values:
                                             byte[] timeStamp = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
@@ -349,19 +347,21 @@ public class MainActivity extends Activity {
 //                                        exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
                                     }
                                     readDataAddress[1]++;
+                                    /*if(readDataAddress[1]!=(byte)0xD7) {
+                                        readDataAddress[1]++;
+                                    } else {
+                                        readDataAddress[1] = (byte)0x29;
+                                    }*/
                                 }
                             }
                         }
                     }
-
-//                    if(!startedGraphingData) {
                     if(!initExecutor) {
                         //TODO: Change (350) to a variable, so the app is more modular.
-                        executor.scheduleAtFixedRate(new graphData(), 0, 350, TimeUnit.MILLISECONDS);
+                        executor.scheduleAtFixedRate(new graphData(), 0, timerPeriod, TimeUnit.MILLISECONDS);
                         initExecutor = true;
                     }
-//                    }
-
+//                    if(!nfcVTag.isConnected())initExecutor = false;
                     //Get values (Timestamp, Sensor 0, Sensor 1)
                     //Write to Drive (use code from ECG)
                     //Sequentially plot points as received [timestamp, sensor]
@@ -378,12 +378,12 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 if(sensor==0) {
-                    if(nfcDataSensor0.size()>HISTORY_SECONDS) {
-                        nfcDataSensor0.removeFirst();
-                    }
-                    double temp = (double)value/16384;
-                    dataVoltage = (temp*1.2);
-                    nfcDataSensor0.addLast(null, dataVoltage);
+//                    if(nfcDataSensor0.size()>HISTORY_SECONDS) {
+//                        nfcDataSensor0.removeFirst();
+//                    }
+//                    double temp = (double)value/16384;
+//                    dataVoltage = (temp*1.2);
+//                    nfcDataSensor0.addLast(null, dataVoltage);
                 } else if(sensor==1) {
                     if(nfcDataSensor1.size()>HISTORY_SECONDS) {
                         nfcDataSensor1.removeFirst();
