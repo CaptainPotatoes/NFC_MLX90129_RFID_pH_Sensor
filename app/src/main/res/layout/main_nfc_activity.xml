@@ -34,13 +34,6 @@
         >
 
         <Button
-            android:text="Temp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/buttonTempMain"
-            android:layout_weight="1" />
-
-        <Button
             android:text="View Config"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
