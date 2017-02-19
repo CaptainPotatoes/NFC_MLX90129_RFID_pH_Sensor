@@ -65,10 +65,9 @@ public class MainActivity extends Activity {
     // Buttons:
     private Button mViewConfigButton;
     private Button mSetConfigButton;
-    private Button mButtonTempMain;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
-    private int timerPeriod = 120;
+    private int timerPeriod = 263;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,13 +83,12 @@ public class MainActivity extends Activity {
         mNFCText = (TextView)findViewById(R.id.nfc_data);
         mViewConfigButton = (Button) findViewById(R.id.viewConfig);
         mSetConfigButton = (Button) findViewById(R.id.writeConfig);
-        mButtonTempMain = (Button) findViewById(R.id.buttonTempMain);
         //Plot stuff:
         xyPlot = (XYPlot) findViewById(R.id.dataPlot);
-        nfcDataSensor0 = new SimpleXYSeries("Temperature Sensor Data");
-        nfcDataSensor1 = new SimpleXYSeries("pH Sensor Data");
+        nfcDataSensor0 = new SimpleXYSeries("pH Sensor Data");
+//        nfcDataSensor1 = new SimpleXYSeries("pH Sensor Data");
         nfcDataSensor0.useImplicitXVals();
-        nfcDataSensor1.useImplicitXVals();
+//        nfcDataSensor1.useImplicitXVals();
         //Todo: Using explicit x values: (over 30s)
 
         xyPlot.setRangeBoundaries(0,1.2, BoundaryMode.FIXED);
@@ -127,9 +125,9 @@ public class MainActivity extends Activity {
         lineAndPointFormatter1.getLinePaint().setStrokeWidth(3);
         xyPlot.addSeries(nfcDataSensor0, lineAndPointFormatter1);
 
-        LineAndPointFormatter lineAndPointFormatter2 = new LineAndPointFormatter(Color.BLUE, null, null, null);
-        lineAndPointFormatter1.getLinePaint().setStrokeWidth(3);
-        xyPlot.addSeries(nfcDataSensor1, lineAndPointFormatter2);
+//        LineAndPointFormatter lineAndPointFormatter2 = new LineAndPointFormatter(Color.BLUE, null, null, null);
+//        lineAndPointFormatter1.getLinePaint().setStrokeWidth(3);
+//        xyPlot.addSeries(nfcDataSensor1, lineAndPointFormatter2);
 
         redrawer = new Redrawer(Arrays.asList(new Plot[]{xyPlot}),100,false);
 
@@ -161,12 +159,6 @@ public class MainActivity extends Activity {
                 Context context = getApplicationContext();
                 Intent intent = new Intent(context, WriteConfig.class);
                 startActivity(intent);
-            }
-        });
-        mButtonTempMain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                testFunction();
             }
         });
     }
@@ -280,15 +272,15 @@ public class MainActivity extends Activity {
                         Toast.makeText(getApplicationContext(), "Could Not Connect To NFC Device", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    //TODO: Schedule at fixed rate: (Enable on connect, disable on disconnect)
+                    //TODO: Read Timer Config and Adjust timerPeriod AAR.
                     //Read register 0x09 to see which sensors are enabled
-                    /*byte[] dmaConfig = tranceiveReadEEPROM(nfcVTag, (byte)0x09);
+                    byte[] dmaConfig = tranceiveReadEEPROM(nfcVTag, (byte)0x09);
                     if(dmaConfig.length>2) {
                         timestampsEnabled = ( (dmaConfig[2] & 0b10000000) == 0b10000000);
                         sensor0Enabled = ( (dmaConfig[2] & 0b00010000) == 0b00010000);
                         sensor1Enabled = ( (dmaConfig[2] & 0b00100000) == 0b00100000);
-                        Log.e(TAG,Boolean.toString(timestampsEnabled)+" "+Boolean.toString(sensor0Enabled)+" "+Boolean.toString(sensor1Enabled));
-                    }*/
+                        Log.e(TAG,"Enabled: "+Boolean.toString(timestampsEnabled)+" "+Boolean.toString(sensor0Enabled)+" "+Boolean.toString(sensor1Enabled));
+                    }
 //                    exportLogFile(false, "Connected at: "+getTimeStamp()+"\r\n");
                     /*if(!timestampsEnabled) {
                         //TODO: USE IMPLICIT X VALUES!
@@ -346,12 +338,12 @@ public class MainActivity extends Activity {
                                         Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
 //                                        exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
                                     }
-                                    readDataAddress[1]++;
-                                    /*if(readDataAddress[1]!=(byte)0xD7) {
+//                                    readDataAddress[1]++;
+                                    if(readDataAddress[1]!=(byte)0xD7) {
                                         readDataAddress[1]++;
                                     } else {
                                         readDataAddress[1] = (byte)0x29;
-                                    }*/
+                                    }
                                 }
                             }
                         }
@@ -378,13 +370,13 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 if(sensor==0) {
-//                    if(nfcDataSensor0.size()>HISTORY_SECONDS) {
-//                        nfcDataSensor0.removeFirst();
-//                    }
-//                    double temp = (double)value/16384;
-//                    dataVoltage = (temp*1.2);
-//                    nfcDataSensor0.addLast(null, dataVoltage);
-                } else if(sensor==1) {
+                    if(nfcDataSensor0.size()>HISTORY_SECONDS) {
+                        nfcDataSensor0.removeFirst();
+                    }
+                    double temp = (double)value/16384;
+                    dataVoltage = (temp*1.2);
+                    nfcDataSensor0.addLast(null, dataVoltage);
+                } /*else if(sensor==1) {
                     if(nfcDataSensor1.size()>HISTORY_SECONDS) {
                         nfcDataSensor1.removeFirst();
                     }
@@ -394,7 +386,7 @@ public class MainActivity extends Activity {
                 } else {
                     //3 is timestamps.
                     //Unused for the timebeing.
-                }
+                }*/
             }
         });
     }
