@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.NfcV;
@@ -15,10 +16,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +30,8 @@ import org.w3c.dom.Text;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mahmoodms on 11/26/2016.
@@ -44,18 +49,23 @@ public class WriteConfig extends Activity {
     private Button mTestConfig;
     private String TAG = "WriteConfigActivity";
     //Checkboxes:
-    CheckBox mCheckBoxSPI;
+
     //RadioButtons:
     RadioButton mRadioButtonWriteFromExternal;
     RadioButton mRadioButtonWriteToExternal;
+    //Spinners:
+    private Spinner spinner, spinner2;
+
     //EditText
     EditText mEditTextTimerCountdown;
     EditText mEditTextSensor0Mux;
     EditText mEditTextSensor0Resistance;
+    EditText mEditTextSensor0DacOffset;
     EditText mEditTextSensor1Mux;
     EditText mEditTextSensor1Resistance;
     //TextViews:
     TextView mTextViewTimerUnits;
+    TextView mTotalGain;
     //Booleans and Options:
     private boolean enableSensor0 = true;
     private boolean enableSensor1 = true;
@@ -66,7 +76,7 @@ public class WriteConfig extends Activity {
     private boolean automaticDataLoggingTimer = true;
     private boolean sensor0Mux = true;
     private boolean sensor0Resistance = true;
-    private boolean sensor0Chopper = true;
+    private boolean sensor0Chopper = false;
     private boolean sensor0LowPowerMode = true;
     private boolean sensor1Mux = true;
     private boolean sensor1Resistance = true;
@@ -75,12 +85,18 @@ public class WriteConfig extends Activity {
     private boolean timerIRQ = false;
     private boolean writeToDevice = false;
 
+    private int sensor0Settings = 2;
     private int writeFromLocation = 0;
     private int writeToLocation = 1;
     private boolean timerStandby = true;
     private int timerUnits = 3;
     private int sensor0ADC = 2;
     private int sensor1ADC = 2;
+    private int pga1Gain = 0;
+    private int pga2Gain = 0;
+
+    private double pga1 = 8;
+    private double pga2 = 1;
 //    private RadioGroup mRadioGroupWriteDataFrom;
 
     private TextView mNfcId;
@@ -116,8 +132,7 @@ public class WriteConfig extends Activity {
             }
         }
         mNfcId = (TextView) findViewById(R.id.nfc_id_write);
-        mCheckBoxSPI = (CheckBox) findViewById(R.id.checkBoxSPI);
-        mCheckBoxSPI.setEnabled(false);
+//        mCheckBoxSPI.setEnabled(false);
         mRadioButtonWriteFromExternal = (RadioButton) findViewById(R.id.radioButtonWriteFromExternal);
         mRadioButtonWriteFromExternal.setVisibility(View.GONE);
         mRadioButtonWriteToExternal = (RadioButton) findViewById(R.id.radioButtonWriteToExternal);
@@ -125,9 +140,107 @@ public class WriteConfig extends Activity {
         mEditTextTimerCountdown = (EditText) findViewById(R.id.editTextTimerCountdown);
         mEditTextSensor0Mux = (EditText) findViewById(R.id.editTextSensor0Mux);
         mEditTextSensor0Resistance = (EditText) findViewById(R.id.editTextSensor0Resistance);
-        mEditTextSensor1Mux = (EditText) findViewById(R.id.editTextSensor1Mux);
-        mEditTextSensor1Resistance = (EditText) findViewById(R.id.editTextSensor1Resistance);
+        mEditTextSensor0DacOffset = (EditText) findViewById(R.id.editTextSensor0DacOffset);
         mTextViewTimerUnits = (TextView) findViewById(R.id.textViewTimerUnits);
+        mTotalGain = (TextView) findViewById(R.id.totalGain);
+        spinner = (Spinner) findViewById(R.id.spinner);
+        spinner2 = (Spinner) findViewById(R.id.spinner2);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() { //PGA 1
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                pga1Gain = i;
+                switch (i) {
+                    case 0: //Default
+                        pga1 = 8;
+                        break;
+                    case 1:
+                        pga1 = 10;
+                        break;
+                    case 2:
+                        pga1 = 12.6;
+                        break;
+                    case 3:
+                        pga1 = 15.5;
+                        break;
+                    case 4:
+                        pga1 = 19.6;
+                        break;
+                    case 5:
+                        pga1 = 24.5;
+                        break;
+                    case 6:
+                        pga1 = 30.8;
+                        break;
+                    case 7:
+                        pga1 = 38.1;
+                        break;
+                    case 8:
+                        pga1 = 47.6;
+                        break;
+                    case 9:
+                        pga1 = 59.4;
+                        break;
+                    case 10:
+                        pga1 = 75;
+                        break;
+                    default:
+                        break;
+                }
+                Log.e(TAG,"pga1Gain = "+String.valueOf(pga1Gain));
+                //Calculate total gain after change:
+                mTotalGain.setText(String.valueOf(pga1*pga2));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                pga1Gain = 0;
+                pga1 = 8.0;
+                Log.e(TAG,"pga1Gain (Default) = "+String.valueOf(pga1Gain));
+                //default
+            }
+        });
+        spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                pga2Gain = i;
+                switch (i) {
+                    case 0: //Default
+                        pga2 = 1;
+                        break;
+                    case 1:
+                        pga2 = 2;
+                        break;
+                    case 2:
+                        pga2 = 3;
+                        break;
+                    case 3:
+                        pga2 = 4;
+                        break;
+                    case 4:
+                        pga2 = 5;
+                        break;
+                    case 5:
+                        pga2 = 6;
+                        break;
+                    case 6:
+                        pga2 = 7;
+                        break;
+                    case 7:
+                        pga2 = 8;
+                        break;
+                }
+                Log.e(TAG,"pga2Gain = "+String.valueOf(pga2Gain));
+                //Calculate total gain after change:
+                mTotalGain.setText(String.valueOf(pga1*pga2));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                pga2Gain = 0;
+                pga2 = 8;
+                Log.e(TAG,"pga2Gain = "+String.valueOf(pga2Gain));
+            }
+        });
         mViewConfig.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -266,15 +379,101 @@ public class WriteConfig extends Activity {
                     byte[] writeCommand16 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand17 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand18 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Conditioner Config
-                    byte[] writeCommand19 = {(byte)0x69, (byte)0x00}; //Default Sensor 0 Connection Config
-                    byte[] writeCommand1A = {(byte)0x40, (byte)0x00}; //Default Sensor 0 Resistance Network
+                    byte[] writeCommand19 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Connection Config
+                    byte[] writeCommand1A = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Resistance Network
+                    if(sensor0Settings==0) { //Light sensor config
+                        writeCommand19[0] = (byte)0x00; writeCommand19[1] = (byte)0x00;
+                        writeCommand1A[0] = (byte)0x02; writeCommand1A[1] = (byte)0x00;
+                    } else if (sensor0Settings==1) { //Ext Temp Sensor
+                        writeCommand19[0] = (byte)0x23; writeCommand19[1] = (byte)0x01;
+                        writeCommand1A[0] = (byte)0x40; writeCommand1A[1] = (byte)0x00;
+                    } else if (sensor0Settings==2) { // Potentiometer Sensor
+                        writeCommand19[0] = (byte)0x69; writeCommand19[1] = (byte)0x00;
+                        writeCommand1A[0] = (byte)0x40; writeCommand1A[1] = (byte)0x00;
+                    } else if (sensor0Settings==3) { //Internal Temp
+                        writeCommand19[0] = (byte)0x31; writeCommand19[1] = (byte)0x02;
+                        writeCommand1A[0] = (byte)0x00; writeCommand1A[1] = (byte)0x80;
+                    }
+                    switch (pga1Gain) { //[8→75g] bits 11:8 (see xls) 0b0000XXXX of byte[B]
+                        case 0: //Default
+                            writeCommand18[1] |= 0b00000000;
+                            break;
+                        case 1:
+                            writeCommand18[1] |= 0b00000001;
+                            break;
+                        case 2:
+                            writeCommand18[1] |= 0b00000010;
+                            break;
+                        case 3:
+                            writeCommand18[1] |= 0b00000011;
+                            break;
+                        case 4:
+                            writeCommand18[1] |= 0b00000100;
+                            break;
+                        case 5:
+                            writeCommand18[1] |= 0b00000101;
+                            break;
+                        case 6:
+                            writeCommand18[1] |= 0b00000110;
+                            break;
+                        case 7:
+                            writeCommand18[1] |= 0b00000111;
+                            break;
+                        case 8:
+                            writeCommand18[1] |= 0b00001000;
+                            break;
+                        case 9:
+                            writeCommand18[1] |= 0b00001001;
+                            break;
+                        case 10:
+                            writeCommand18[1] |= 0b00001111;
+                            break;
+                        default:
+                            break;
+                    }
+                    switch (pga2Gain) {
+                        case 0: //Default
+                            writeCommand18[1] |= 0b00000000;
+                            break;
+                        case 1:
+                            writeCommand18[1] |= 0b00010000;
+                            break;
+                        case 2:
+                            writeCommand18[1] |= 0b00100000;
+                            break;
+                        case 3:
+                            writeCommand18[1] |= 0b00110000;
+                            break;
+                        case 4:
+                            writeCommand18[1] |= 0b01000000;
+                            break;
+                        case 5:
+                            writeCommand18[1] |= 0b01010000;
+                            break;
+                        case 6:
+                            writeCommand18[1] |= 0b01100000;
+                            break;
+                        case 7:
+                            writeCommand18[1] |= 0b01110000;
+                            break;
+                    }
+                    if(sensor0Chopper) {
+                        writeCommand18[1] |= 0b10000000;
+                    }
+                    //18[0]
+                    String dacOffset = mEditTextSensor0DacOffset.getText().toString();
+//                    int parsedHex = Integer.parseInt(dacOffset);
+                    int parsedHex = Integer.parseInt(dacOffset,16);
+                    Log.e(TAG,"Int: parsedInt: "+String.valueOf(parsedHex));
+                    writeCommand18[0] = intToSingleByte(parsedHex);
+
                     //TODO: FIX THIS CONFIGURATION
-                    byte[] writeCommand1B = {(byte)0xF0, (byte)0x40}; //Default Sensor 1 Control word: (same default config)
-                    byte[] writeCommand1C = {(byte)0x00, (byte)0x00}; //Default Sensor 1 threshold (0):
-                    byte[] writeCommand1D = {(byte)0x00, (byte)0x00}; //Default Sensor 1 threshold (0):
-                    byte[] writeCommand1E = {(byte)0x00, (byte)0x00}; //Default Sensor 1 Conditioner Config
-                    byte[] writeCommand1F = {(byte)0x00, (byte)0x00}; //Default Sensor 1 Connection Config ?????????????
-                    byte[] writeCommand20 = {(byte)0x02, (byte)0x00}; //Default Sensor 1 Resistance Network
+//                    byte[] writeCommand1B = {(byte)0xF0, (byte)0x40}; //Default Sensor 1 Control word: (same default config)
+//                    byte[] writeCommand1C = {(byte)0x00, (byte)0x00}; //Default Sensor 1 threshold (0):
+//                    byte[] writeCommand1D = {(byte)0x00, (byte)0x00}; //Default Sensor 1 threshold (0):
+//                    byte[] writeCommand1E = {(byte)0x00, (byte)0x00}; //Default Sensor 1 Conditioner Config
+//                    byte[] writeCommand1F = {(byte)0x00, (byte)0x00}; //Default Sensor 1 Connection Config ?????????????
+//                    byte[] writeCommand20 = {(byte)0x02, (byte)0x00}; //Default Sensor 1 Resistance Network
                     // Store all samples; mean of 2 samples A: [0 1 1 1 0 0 1 1] B: [00000000]
                     //VERIFY VIA LOGGING:
                     Log.e(TAG,"Write[0x##] = 0xAABB - In order they are programmed");
@@ -294,12 +493,12 @@ public class WriteConfig extends Activity {
                     Log.e(TAG,"Write[0x18] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand18));
                     Log.e(TAG,"Write[0x19] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand19));
                     Log.e(TAG,"Write[0x1A] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1A));
-                    Log.e(TAG,"Write[0x1B] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1B));
+                    /*Log.e(TAG,"Write[0x1B] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1B));
                     Log.e(TAG,"Write[0x1C] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1C));
                     Log.e(TAG,"Write[0x1D] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1D));
                     Log.e(TAG,"Write[0x1E] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1E));
                     Log.e(TAG,"Write[0x1F] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand1F));
-                    Log.e(TAG,"Write[0x20] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand20));
+                    Log.e(TAG,"Write[0x20] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand20));*/
                     //WRITE:                 Tag,    address, commandBytes[A, B]
                     if(writeToDevice) {
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x09, writeCommand09); // DMA Configuration
@@ -332,7 +531,7 @@ public class WriteConfig extends Activity {
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x1A, writeCommand1A); // Sensor 0 Resistance Network
                         MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1B, writeCommand1B); // Sensor 1 Control Word
+                        /*tranceiveWriteEEPROM(nfcVTag, (byte)0x1B, writeCommand1B); // Sensor 1 Control Word
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x1C, writeCommand1C); // Sensor 1 ThreshLow
                         MainActivity.delayMS(50);
@@ -342,7 +541,7 @@ public class WriteConfig extends Activity {
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x1F, writeCommand1F); // Sensor 1 Connection Config
                         MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x20, writeCommand20); // Sensor 1 Resistance Network
+                        tranceiveWriteEEPROM(nfcVTag, (byte)0x20, writeCommand20); // Sensor 1 Resistance Network*/
                     }
                     //TODO: Set condition for checking if SPI is available, then ungrey using [mCheckBoxSPI.setEnabled(true);]
                     //: If either sensor is disabled, grey out its settings and change the color of TV to Grey.
@@ -362,59 +561,26 @@ public class WriteConfig extends Activity {
                 enableSensor0 = checked;
                 Log.e(TAG, "checkBoxEnableSensor0: "+Boolean.toString(enableSensor0));
                 break;
-            case R.id.checkBoxEnableSensor1:
-                //TODO: IF SENSOR DISABLED; GREY OUT SETTINGS
-                enableSensor1 = checked;
-                Log.e(TAG, "checkBoxEnableSensor1: "+Boolean.toString(enableSensor1));
-                break;
-            case R.id.checkBoxTimeStamps:
-                enableTimeStamps = checked;
-                break;
-            case R.id.checkBoxSPI:
-                enableSPI = checked;
-                Log.e(TAG, "checkBoxSPI: "+Boolean.toString(enableSPI));
-                break;
-            case R.id.checkBoxDefaultSettingsDMA:
-                defaultDMASettings = checked;
-                break;
-            case R.id.checkBoxManualDMA:
-                manualDMA = checked;
-                break;
-            case R.id.checkBoxAutomaticLoggingTimer:
-                automaticDataLoggingTimer = checked;
-                break;
-            case R.id.timerStandby:
-                timerStandby = checked;
-                Log.e(TAG, "Timer Standby: "+Boolean.toString(timerStandby));
-                break;
-            case R.id.timerIRQ:
-                timerIRQ = checked;
-                break;
-            case R.id.checkBoxSensor0Resistance:
-                sensor0Resistance = checked;
-                break;
-            case R.id.checkBoxSensor0InputMux:
-                sensor0Mux = checked;
-                break;
             case R.id.checkBoxSensor0Chopper:
                 sensor0Chopper = checked;
                 break;
-            case R.id.checkBoxSensor0LowPowerMode:
-                sensor0LowPowerMode = checked;
-                break;
-            case R.id.checkBoxSensor1InputMux:
-                sensor1Mux = checked;
-                break;
-            case R.id.checkBoxSensor1Resistance:
-                sensor1Resistance = checked;
-                break;
-            case R.id.checkBoxSensor1Chopper:
-                sensor1Chopper = checked;
-                break;
-            case R.id.checkBoxSensor1LowPowerMode:
-                sensor1LowPowerMode = checked;
-                break;
+        }
+    }
 
+    public void onRadioButtonClickedSensorConfig(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        switch (view.getId()) {
+            case R.id.radioButton7:
+                if(checked) sensor0Settings = 0;
+                break;
+            case R.id.radioButton8:
+                if(checked) sensor0Settings = 1;
+                break;
+            case R.id.radioButton13:
+                if(checked) sensor0Settings = 2;
+                break;
+            case R.id.radioButton14:
+                if(checked) sensor0Settings = 3;
         }
     }
 
@@ -481,42 +647,6 @@ public class WriteConfig extends Activity {
         }
     }
 
-    public void onRadioButtonClickedSensor0ADC(View view) {
-        boolean checked = ((RadioButton) view).isChecked();
-        switch (view.getId()) {
-            case R.id.radioButton13:
-                if(checked) sensor0ADC = 4; // Slowest Most Accurate
-                break;
-            case R.id.radioButton14:
-                if(checked) sensor0ADC = 3; // Slow Accurate
-                break;
-            case R.id.radioButton15:
-                if(checked) sensor0ADC = 2; // Fast, Accurate
-                break;
-            case R.id.radioButton16:
-                if(checked) sensor0ADC = 1; // Fastest, Most Accurate
-                break;
-        }
-    }
-
-    public void onRadioButtonClickedSensor1ADC(View view) {
-        boolean checked = ((RadioButton) view).isChecked();
-        switch (view.getId()) {
-            case R.id.radioButton17:
-                if(checked) sensor1ADC = 4;
-                break;
-            case R.id.radioButton18:
-                if(checked) sensor1ADC = 3;
-                break;
-            case R.id.radioButton19:
-                if(checked) sensor1ADC = 2;
-                break;
-            case R.id.radioButton20:
-                if(checked) sensor1ADC = 1;
-                break;
-        }
-    }
-
     public static final int byteA = 0;
     public static final int byteB = 1;
 
@@ -538,23 +668,6 @@ public class WriteConfig extends Activity {
         }
     }
 
-    /*protected byte[] tranceiveWriteEEPROM(NfcV nfcVTag, byte address, byte commandByte0, byte commandByte1) {
-        byte[] response = {(byte) 0xFF};
-        try {
-            //                                 flag,       action,
-            byte[] WriteSingleBlockFrame = {(byte)0x43, (byte)0x21, commandByte0, commandByte1};
-            response = nfcVTag.transceive(WriteSingleBlockFrame);
-            if(response[0]==(byte)0x00) {
-                Log.i(TAG, "Success: Write EEPROM");
-            } else {
-                Log.e(TAG, "Fail: Write EEPROM, error code: " + String.valueOf((response[0] & 0xFF)));
-            }
-            return response;
-        } catch (Exception e) {
-            Log.e(TAG, "Fail: Write EEPROM Exception");
-            return response;
-        }
-    }*/
     byte[] swap2Bytes(byte[] b) {
         byte[] switched = new byte[2];
         if(b.length==2) {
@@ -576,6 +689,11 @@ public class WriteConfig extends Activity {
 //        result[2] = (byte) (i >> 8);
 //        result[3] = (byte) (i /*>> 0*/);
 
+        return result;
+    }
+
+    byte intToSingleByte(int i) {
+        byte result = (byte)(i);
         return result;
     }
 

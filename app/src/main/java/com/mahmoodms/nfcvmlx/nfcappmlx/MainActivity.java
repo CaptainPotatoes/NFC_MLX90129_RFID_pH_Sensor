@@ -300,13 +300,27 @@ public class MainActivity extends Activity {
                     sensor1Index = 0;
                     lastPlottedIndex = 0;
 //                    readDataAddress[1] = (byte) 0x29;
+                    //TODO: CHECK IF BITMASKS ENABLED (needs to have 2+ of either Timestamps, S0, S1 or S2 enabled)
                     class graphData implements Runnable {
                         @Override
                         public void run() {
+                            Log.e(TAG, "isConnected: "+String.valueOf(nfcVTag.isConnected()));
                             if(nfcVTag.isConnected()) {
                                 if(readDataAddress.length>2) {
                                     byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
                                     if(readEEPROM.length>2) {
+                                        byte[] sensor0Datapoint = {readEEPROM[1], readEEPROM[2]};
+                                        sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
+//                                        byte[] a = new byte[1];
+//                                        a[0] = readDataAddress[1];
+//                                        Log.e(TAG,"CurrentAddr: "+String.valueOf(bytesWordToInt(a)));
+                                        Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
+                                        updateIonSensorData(0, sensor0Data[sensor0Index]);
+                                        sensor0Index++;
+                                    } else {
+                                        Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
+                                    }
+                                    /*if(readEEPROM.length>2) {
                                         if((readEEPROM[2] & 0b11000000) == 0b11000000) {
                                             //timestamp //Todo: use 0b00 bitmask to convert to correct values:
                                             byte[] timeStamp = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
@@ -337,8 +351,9 @@ public class MainActivity extends Activity {
                                     } else {
                                         Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
 //                                        exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
-                                    }
+                                    }*/
 //                                    readDataAddress[1]++;
+                                    //TODO: Add condition: only if LOOP enabled; otherwise just stop @ 0xD7
                                     if(readDataAddress[1]!=(byte)0xD7) {
                                         readDataAddress[1]++;
                                     } else {
@@ -364,6 +379,7 @@ public class MainActivity extends Activity {
     }
 
     private double dataVoltage = 0;
+    private static final int MAXVAL = 65536;//16384
 
     private void updateIonSensorData(final int sensor, final int value){
         runOnUiThread(new Runnable() {
@@ -373,20 +389,20 @@ public class MainActivity extends Activity {
                     if(nfcDataSensor0.size()>HISTORY_SECONDS) {
                         nfcDataSensor0.removeFirst();
                     }
-                    double temp = (double)value/16384;
+                    double temp = (double)value/MAXVAL;
                     dataVoltage = (temp*1.2);
                     nfcDataSensor0.addLast(null, dataVoltage);
-                } /*else if(sensor==1) {
+                } else if(sensor==1) {
                     if(nfcDataSensor1.size()>HISTORY_SECONDS) {
                         nfcDataSensor1.removeFirst();
                     }
-                    double temp = (double)value/16384;
+                    double temp = (double)value/MAXVAL;
                     dataVoltage = (temp*1.2);
                     nfcDataSensor1.addLast(null, dataVoltage);
                 } else {
                     //3 is timestamps.
                     //Unused for the timebeing.
-                }*/
+                }
             }
         });
     }
