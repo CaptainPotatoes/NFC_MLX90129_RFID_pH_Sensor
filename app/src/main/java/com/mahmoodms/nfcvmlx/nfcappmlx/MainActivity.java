@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
     private SimpleXYSeries nfcDataSensor0;
     private SimpleXYSeries nfcDataSensor1;
     private Redrawer redrawer;
-    private final int HISTORY_SECONDS = 30;
+    private final int HISTORY_DATAPOINTS = 150;
     // NFC Stuff:
     private NfcAdapter mAdapter;
     private PendingIntent mPendingIntent;
@@ -67,7 +67,7 @@ public class MainActivity extends Activity {
     private Button mSetConfigButton;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
-    private int timerPeriod = 263;
+    private int timerPeriod = 275;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,9 +95,9 @@ public class MainActivity extends Activity {
         xyPlot.setRangeStepMode(XYStepMode.INCREMENT_BY_VAL);
         xyPlot.setRangeStepValue(0.3);
 
-        xyPlot.setDomainBoundaries(0, HISTORY_SECONDS, BoundaryMode.FIXED);
+        xyPlot.setDomainBoundaries(0, HISTORY_DATAPOINTS, BoundaryMode.FIXED);
         xyPlot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
-        xyPlot.setDomainStepValue(HISTORY_SECONDS/10);
+        xyPlot.setDomainStepValue(HISTORY_DATAPOINTS/10);
 
         xyPlot.setRangeStepMode(XYStepMode.INCREMENT_BY_VAL);
         xyPlot.setDomainLabel("Time (seconds)");
@@ -304,16 +304,13 @@ public class MainActivity extends Activity {
                     class graphData implements Runnable {
                         @Override
                         public void run() {
-                            Log.e(TAG, "isConnected: "+String.valueOf(nfcVTag.isConnected()));
+//                            Log.e(TAG, "isConnected: "+String.valueOf(nfcVTag.isConnected()));
                             if(nfcVTag.isConnected()) {
                                 if(readDataAddress.length>2) {
                                     byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
                                     if(readEEPROM.length>2) {
                                         byte[] sensor0Datapoint = {readEEPROM[1], readEEPROM[2]};
                                         sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
-//                                        byte[] a = new byte[1];
-//                                        a[0] = readDataAddress[1];
-//                                        Log.e(TAG,"CurrentAddr: "+String.valueOf(bytesWordToInt(a)));
                                         Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
                                         updateIonSensorData(0, sensor0Data[sensor0Index]);
                                         sensor0Index++;
@@ -386,14 +383,14 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 if(sensor==0) {
-                    if(nfcDataSensor0.size()>HISTORY_SECONDS) {
+                    if(nfcDataSensor0.size()>HISTORY_DATAPOINTS) {
                         nfcDataSensor0.removeFirst();
                     }
                     double temp = (double)value/MAXVAL;
                     dataVoltage = (temp*1.2);
                     nfcDataSensor0.addLast(null, dataVoltage);
                 } else if(sensor==1) {
-                    if(nfcDataSensor1.size()>HISTORY_SECONDS) {
+                    if(nfcDataSensor1.size()>HISTORY_DATAPOINTS) {
                         nfcDataSensor1.removeFirst();
                     }
                     double temp = (double)value/MAXVAL;

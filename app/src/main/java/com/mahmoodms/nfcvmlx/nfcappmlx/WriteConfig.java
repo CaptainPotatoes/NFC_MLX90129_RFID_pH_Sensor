@@ -380,8 +380,10 @@ public class WriteConfig extends Activity {
                     byte[] writeCommand17 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand18 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Conditioner Config
                     byte[] writeCommand19 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Connection Config
-                    byte[] writeCommand1A = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Resistance Network
-                    if(sensor0Settings==0) { //Light sensor config
+                    byte[] writeCommand1A = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Resistance Network.
+                    writeCommand19[0] = (byte)0x80; writeCommand19[1] = (byte)0x00;
+                    writeCommand1A[0] = (byte)0x10; writeCommand1A[1] = (byte)0x00;
+                    /*if(sensor0Settings==0) { //Light sensor config
                         writeCommand19[0] = (byte)0x00; writeCommand19[1] = (byte)0x00;
                         writeCommand1A[0] = (byte)0x02; writeCommand1A[1] = (byte)0x00;
                     } else if (sensor0Settings==1) { //Ext Temp Sensor
@@ -393,7 +395,7 @@ public class WriteConfig extends Activity {
                     } else if (sensor0Settings==3) { //Internal Temp
                         writeCommand19[0] = (byte)0x31; writeCommand19[1] = (byte)0x02;
                         writeCommand1A[0] = (byte)0x00; writeCommand1A[1] = (byte)0x80;
-                    }
+                    }*/
                     switch (pga1Gain) { //[8→75g] bits 11:8 (see xls) 0b0000XXXX of byte[B]
                         case 0: //Default
                             writeCommand18[1] |= 0b00000000;
