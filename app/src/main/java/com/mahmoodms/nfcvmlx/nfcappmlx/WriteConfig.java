@@ -461,13 +461,14 @@ public class WriteConfig extends Activity {
                     }
                     if(sensor0Chopper) {
                         writeCommand18[1] |= 0b10000000;
+                        writeCommand18[0] |= 0b11111111;
                     }
                     //18[0]
-                    String dacOffset = mEditTextSensor0DacOffset.getText().toString();
+                    /*String dacOffset = mEditTextSensor0DacOffset.getText().toString();
 //                    int parsedHex = Integer.parseInt(dacOffset);
                     int parsedHex = Integer.parseInt(dacOffset,16);
                     Log.e(TAG,"Int: parsedInt: "+String.valueOf(parsedHex));
-                    writeCommand18[0] = intToSingleByte(parsedHex);
+                    writeCommand18[0] = intToSingleByte(parsedHex);*/
 
                     //TODO: FIX THIS CONFIGURATION
 //                    byte[] writeCommand1B = {(byte)0xF0, (byte)0x40}; //Default Sensor 1 Control word: (same default config)
