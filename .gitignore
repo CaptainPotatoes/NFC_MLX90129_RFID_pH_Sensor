@@ -47,3 +47,6 @@ build/generated/mockable-android-24.jar
 build/intermediates/dex-cache/cache.xml
 local.properties
 app/app.iml
+build/
+.gradle/
+projectFilesBackup/
