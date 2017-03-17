@@ -207,7 +207,7 @@ public class ViewConfig extends Activity {
                     for (int i = address[0]; i < 0x21; i++) {
                         byte[] responseRead = tranceiveReadEEPROM(nfcVTag, address[0]);
                         allEEPROMData[i-0x09] = responseRead; //Add data to matrix
-                        delayMS(50);
+                        delayMS(120);
                         if(responseRead.length>2){
                             byte[] show = {responseRead[1], responseRead[2]};
                             //as stored on the device

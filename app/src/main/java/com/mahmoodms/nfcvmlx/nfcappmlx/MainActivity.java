@@ -67,7 +67,7 @@ public class MainActivity extends Activity {
     private Button mSetConfigButton;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
-    private int timerPeriod = 275;
+    private int timerPeriod = 255;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -305,8 +305,9 @@ public class MainActivity extends Activity {
                         @Override
                         public void run() {
 //                            Log.e(TAG, "isConnected: "+String.valueOf(nfcVTag.isConnected()));
-                            if(nfcVTag.isConnected()) {
+//                            if(nfcVTag.isConnected()) {
                                 if(readDataAddress.length>2) {
+                                    boolean c;
                                     byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
                                     if(readEEPROM.length>2) {
                                         byte[] sensor0Datapoint = {readEEPROM[1], readEEPROM[2]};
@@ -314,49 +315,20 @@ public class MainActivity extends Activity {
                                         Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
                                         updateIonSensorData(0, sensor0Data[sensor0Index]);
                                         sensor0Index++;
+                                        c = true;
                                     } else {
+                                        c = false;
                                         Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
                                     }
-                                    /*if(readEEPROM.length>2) {
-                                        if((readEEPROM[2] & 0b11000000) == 0b11000000) {
-                                            //timestamp //Todo: use 0b00 bitmask to convert to correct values:
-                                            byte[] timeStamp = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-                                            timeStampData[timeStampIndex] = bytesWordToIntAlt(timeStamp);
-                                            Log.e(TAG,"INTVAL TS: "+String.valueOf(timeStampData[timeStampIndex]));
-//                                            exportLogFile(false, "T = "+String.valueOf(timeStampData[timeStampIndex])+"\r\n");
-                                            updateIonSensorData(3, timeStampData[timeStampIndex]);
-                                            timeStampIndex++;
-                                        } else if ((readEEPROM[2] & 0b11000000) == 0b01000000) {
-                                            // Sensor 1 (external)
-                                            byte[] sensor1Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-                                            sensor1Data[sensor1Index] = bytesWordToIntAlt(sensor1Datapoint);
-                                            Log.e(TAG,"INTVAL S1: "+String.valueOf(sensor1Data[sensor1Index]));
-                                            double temp = (double)bytesWordToIntAlt(sensor1Datapoint)/16384;
-                                            double voltFinal = temp*1.2;
-                                            exportLogFile(false,String.valueOf(voltFinal)+"\r");
-                                            updateIonSensorData(1, sensor1Data[sensor1Index]);
-                                            sensor1Index++;
-                                        } else {
-                                            //Sensor 0 (internal)
-                                            byte[] sensor0Datapoint = {readEEPROM[1], ((byte)(readEEPROM[2] & 0b00111111))};
-                                            sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
-                                            Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
-//                                            exportLogFile(false, "S0: "+String.valueOf(sensor0Data[sensor0Index])+"\r\n");
-                                            updateIonSensorData(0, sensor0Data[sensor0Index]);
-                                            sensor0Index++;
-                                        }
-                                    } else {
-                                        Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
-//                                        exportLogFile(false, "Data Error: 0x"+ViewConfig.toHexStringBigEndian(readEEPROM)+"\r\n");
-                                    }*/
 //                                    readDataAddress[1]++;
                                     //TODO: Add condition: only if LOOP enabled; otherwise just stop @ 0xD7
-                                    if(readDataAddress[1]!=(byte)0xD7) {
-                                        readDataAddress[1]++;
-                                    } else {
-                                        readDataAddress[1] = (byte)0x29;
-                                    }
-                                }
+//                                    readDataAddress[1]++;
+//                                    if(c) {
+//                                        if(readDataAddress[1]<(byte)0xFF) { //FINAL ADDRESS IS 0xFF not 0xD7
+//
+//                                        }
+//                                    }
+//                                }
                             }
                         }
                     }
@@ -453,7 +425,7 @@ public class MainActivity extends Activity {
             response = nfcVTag.transceive(WriteSingleBlockFrame);
             if(response[0] == (byte) 0x00 /*|| response[0] == (byte) 0x01*/) {
                 //response 01 = error sent back by tag (new Android 4.2.2) or BC
-//                Log.i(TAG,"SUCCESS: Read EEPROM[0x"+toHexStringLittleEndian(addr)+"] = "+String.valueOf(response[0]));
+                Log.i(TAG,"SUCCESS: Read EEPROM[0x"+ViewConfig.toHexStringLittleEndian(addr)+"]");
             }
             return response;
         } catch(Exception e) {
