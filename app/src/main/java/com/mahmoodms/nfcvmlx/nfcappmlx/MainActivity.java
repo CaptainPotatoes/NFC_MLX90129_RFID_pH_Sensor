@@ -67,7 +67,7 @@ public class MainActivity extends Activity {
     private Button mSetConfigButton;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
-    private int timerPeriod = 255;
+    private int timerPeriod = 1090;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -274,13 +274,13 @@ public class MainActivity extends Activity {
                     }
                     //TODO: Read Timer Config and Adjust timerPeriod AAR.
                     //Read register 0x09 to see which sensors are enabled
-                    byte[] dmaConfig = tranceiveReadEEPROM(nfcVTag, (byte)0x09);
-                    if(dmaConfig.length>2) {
-                        timestampsEnabled = ( (dmaConfig[2] & 0b10000000) == 0b10000000);
-                        sensor0Enabled = ( (dmaConfig[2] & 0b00010000) == 0b00010000);
-                        sensor1Enabled = ( (dmaConfig[2] & 0b00100000) == 0b00100000);
-                        Log.e(TAG,"Enabled: "+Boolean.toString(timestampsEnabled)+" "+Boolean.toString(sensor0Enabled)+" "+Boolean.toString(sensor1Enabled));
-                    }
+//                    byte[] dmaConfig = tranceiveReadEEPROM(nfcVTag, (byte)0x09);
+//                    if(dmaConfig.length>2) {
+//                        timestampsEnabled = ( (dmaConfig[2] & 0b10000000) == 0b10000000);
+//                        sensor0Enabled = ( (dmaConfig[2] & 0b00010000) == 0b00010000);
+//                        sensor1Enabled = ( (dmaConfig[2] & 0b00100000) == 0b00100000);
+//                        Log.e(TAG,"Enabled: "+Boolean.toString(timestampsEnabled)+" "+Boolean.toString(sensor0Enabled)+" "+Boolean.toString(sensor1Enabled));
+//                    }
 //                    exportLogFile(false, "Connected at: "+getTimeStamp()+"\r\n");
                     /*if(!timestampsEnabled) {
                         //TODO: USE IMPLICIT X VALUES!
@@ -320,14 +320,16 @@ public class MainActivity extends Activity {
                                         c = false;
                                         Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
                                     }
-//                                    readDataAddress[1]++;
+
                                     //TODO: Add condition: only if LOOP enabled; otherwise just stop @ 0xD7
 //                                    readDataAddress[1]++;
-//                                    if(c) {
-//                                        if(readDataAddress[1]<(byte)0xFF) { //FINAL ADDRESS IS 0xFF not 0xD7
-//
-//                                        }
-//                                    }
+                                    if(c) {
+                                        if(readDataAddress[1]==(byte)0xFF) {
+                                            readDataAddress[1] = (byte)0x29;
+                                        } else {
+                                            readDataAddress[1]++;
+                                        }
+                                    }
 //                                }
                             }
                         }
