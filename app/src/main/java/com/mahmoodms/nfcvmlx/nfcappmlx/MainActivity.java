@@ -67,7 +67,8 @@ public class MainActivity extends Activity {
     private Button mSetConfigButton;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
-    private int timerPeriod = 275;
+//    private int timerPeriod = 310;
+    private int timerPeriod = 565;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -388,6 +389,7 @@ public class MainActivity extends Activity {
                     }
                     double temp = (double)value/MAXVAL;
                     dataVoltage = (temp*1.2);
+                    exportLogFile(false, String.valueOf(dataVoltage));
                     nfcDataSensor0.addLast(null, dataVoltage);
                 } else if(sensor==1) {
                     if(nfcDataSensor1.size()>HISTORY_DATAPOINTS) {
