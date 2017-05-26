@@ -357,7 +357,6 @@ public class WriteConfig extends Activity {
                     } else if (writeFromLocation==3) {
                         writeCommand09[0] = (byte)(writeCommand09[0] | 0b00100000);
                     } //else do nothing
-
                     if(!manualDMA) {
                         writeCommand09[0] = (byte)(writeCommand09[0] | 0b00000001);
                     }
@@ -368,23 +367,24 @@ public class WriteConfig extends Activity {
                     byte[] writeCommand0B = {(byte)0x29, (byte)0x00};
                     byte[] writeCommand0C = {(byte)0xD7, (byte)0x00};
                     //TIMER CONTROL:
-                    byte[] writeCommand0F = {(byte)0x01, (byte)0x00}; //1
+//                    byte[] writeCommand0F = {(byte)0x01, (byte)0x00}; //1
 //                    byte[] writeCommand0F = {(byte)0xFA, (byte)0x00}; //250
-//                    byte[] writeCommand0F = {(byte)0xF4, (byte)0x01}; //500
-//                    byte[] writeCommand10 = {(byte)0x0C, (byte)0x00}; //ms
-                    byte[] writeCommand10 = {(byte)0x1C, (byte)0x00}; //s
+                    byte[] writeCommand0F = {(byte)0xF4, (byte)0x01}; //500
+                    byte[] writeCommand10 = {(byte)0x04, (byte)0x00}; //ms
+//                    byte[] writeCommand10 = {(byte)0x14, (byte)0x00}; //s
                     //TODO: SENSOR POWER CONFIG & TRIMMING
                     byte[] writeCommand12 = {(byte)0xFF, (byte)0x00}; //Default Sensor Power Config
                     byte[] writeCommand14 = {(byte)0x00, (byte)0x00}; //Default Sensor trimming max kOhm
 
-                    byte[] writeCommand15 = {(byte)0x70, (byte)0xC0}; //Default Sensor 0 Control word:
+                    byte[] writeCommand15 = {(byte)0x70, (byte)0x40}; //Default Sensor 0 Control word:
                     byte[] writeCommand16 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand17 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand18 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Conditioner Config
-                    byte[] writeCommand19 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Connection Config
-                    byte[] writeCommand1A = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Resistance Network.
-                    writeCommand19[0] = (byte)0x80; writeCommand19[1] = (byte)0x00;
-                    writeCommand1A[0] = (byte)0x10; writeCommand1A[1] = (byte)0x00;
+                    byte[] writeCommand19 = {(byte)0x80, (byte)0x00}; //Default Sensor 0 Connection Config
+                    byte[] writeCommand1A = {(byte)0x10, (byte)0x00}; //Default Sensor 0 Resistance Network.
+                    //for external voltage difference detection sensor
+//                    writeCommand19[0] = (byte)0x80; writeCommand19[1] = (byte)0x00;
+//                    writeCommand1A[0] = (byte)0x10; writeCommand1A[1] = (byte)0x00;
                     /*if(sensor0Settings==0) { //Light sensor config
                         writeCommand19[0] = (byte)0x00; writeCommand19[1] = (byte)0x00;
                         writeCommand1A[0] = (byte)0x02; writeCommand1A[1] = (byte)0x00;
@@ -471,7 +471,6 @@ public class WriteConfig extends Activity {
                     int parsedHex = Integer.parseInt(dacOffset,16);
                     Log.e(TAG,"Int: parsedInt: "+String.valueOf(parsedHex));
                     writeCommand18[0] = intToSingleByte(parsedHex);*/
-
                     //TODO: FIX THIS CONFIGURATION
 //                    byte[] writeCommand1B = {(byte)0xF0, (byte)0x40}; //Default Sensor 1 Control word: (same default config)
 //                    byte[] writeCommand1C = {(byte)0x00, (byte)0x00}; //Default Sensor 1 threshold (0):

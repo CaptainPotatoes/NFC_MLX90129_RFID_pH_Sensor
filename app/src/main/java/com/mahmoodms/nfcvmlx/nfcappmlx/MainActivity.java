@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
     private Button mSetConfigButton;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
-    private int timerPeriod = 1250;
+    private int timerPeriod = 505;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -249,7 +249,7 @@ public class MainActivity extends Activity {
     private boolean sensor1Enabled = false;
     private int[] timeStampData = new int[100];
     private int timeStampIndex;
-    private int[] sensor0Data = new int[100];
+    private int[] sensor0Data = new int[256];
     private int sensor0Index;
     private int sensor1Index;
     private int lastPlottedIndex;
@@ -324,11 +324,14 @@ public class MainActivity extends Activity {
                                         Log.e(TAG, "ReadData = 0x"+ ViewConfig.toHexStringBigEndian(readEEPROM));
                                     }
                                     //TODO: Add condition: only if LOOP enabled; otherwise just stop @ 0xD7
-                                    if(readDataAddress[1]!=(byte)0xD7) {
+                                    Log.e(TAG,"CurrAddr:[0x"+ ViewConfig.toHexStringLittleEndian(readDataAddress)+"]");
+                                    if(readDataAddress[1]!=(byte)0xFF) {
                                         if(a) readDataAddress[1]++;
                                     } else {
                                         readDataAddress[1] = (byte)0x29;
+                                        sensor0Index=0;
                                     }
+//                                    readDataAddress[1]++;
                                 }
                             }
                         }
@@ -340,8 +343,6 @@ public class MainActivity extends Activity {
                     }
 //                    if(!nfcVTag.isConnected())initExecutor = false;
                     //Get values (Timestamp, Sensor 0, Sensor 1)
-                    //Write to Drive (use code from ECG)
-                    //Sequentially plot points as received [timestamp, sensor]
                     //Can plot both Sensor 0 and Sensor 1 separately.
                 }
             }

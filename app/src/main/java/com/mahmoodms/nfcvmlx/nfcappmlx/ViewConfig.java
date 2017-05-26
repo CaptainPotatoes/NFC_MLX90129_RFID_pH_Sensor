@@ -140,7 +140,6 @@ public class ViewConfig extends Activity {
 //                eepromDataStrings[15] = "Sensor 0 Chopper Enabled";
 //                byte[] mux = {allEEPROMData[16][1],allEEPROMData[16][2]};
 //                eepromDataStrings[16] = "Sensor 0 Input Multiplexer Set: 0x"+toHexStringLittleEndian(mux);
-//
 //                eepromDataStrings[17] = "Sensor 1 Enabled";
 //                eepromDataStrings[18] = "Sensor 1 Low Power Mode Enabled";
 //                eepromDataStrings[19] = "Sensor 1 Level 4 ADC Conversion (Slowest, Most Accurate)";
@@ -201,7 +200,6 @@ public class ViewConfig extends Activity {
                     }
                     //Read Registers 0x09→0x020 for sensors 0 and 1:
                     //Data Matrix from 0→23 (i-9)
-//                    String concat = "";
                     Log.e(TAG, "EEPROM Read ["+"0x##"+"] = 0xAABB");
                     byte[] address = {(byte) 0x09};
                     for (int i = address[0]; i < 0x21; i++) {
