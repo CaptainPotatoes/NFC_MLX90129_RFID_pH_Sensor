@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
     private Button mSetConfigButton;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
-    private int timerPeriod = 505;
+    private int timerPeriod = 550;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -313,11 +313,11 @@ public class MainActivity extends Activity {
                                     if(readEEPROM.length>2) {
                                         byte[] sensor0Datapoint = {readEEPROM[1], readEEPROM[2]};
                                         sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
-                                        if (sensor0Data[sensor0Index]==43690 || sensor0Data[sensor0Index]==0) {
-                                            a = false;
-                                        } else {
-                                            updateIonSensorData(0, sensor0Data[sensor0Index]);
-                                        }
+//                                        if (sensor0Data[sensor0Index]==43690 || sensor0Data[sensor0Index]==0) {
+//                                            a = false;
+//                                        } else {
+//                                        }
+                                        updateIonSensorData(0, sensor0Data[sensor0Index]);
                                         Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
                                         sensor0Index++;
                                     } else {

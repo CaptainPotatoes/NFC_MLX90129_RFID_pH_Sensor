@@ -362,6 +362,10 @@ public class WriteConfig extends Activity {
                     }
                     //command: [0] is bits 0→7, and [1] is bits 8→15
                     */
+                    byte[] writeCommand04 = {(byte)0xA8, (byte)0xAA}; // DMA CONFIGS:
+                    byte[] writeCommand05 = {(byte)0xF0, (byte)0x3F}; // DMA CONFIGS:
+                    byte[] writeCommand06 = {(byte)0x00, (byte)0x00}; // DMA CONFIGS:
+
                     byte[] writeCommand09 = {(byte)0x78, (byte)0x10}; // DMA CONFIGS:
                     byte[] writeCommand0A = {(byte)0x00, (byte)0x00};
                     byte[] writeCommand0B = {(byte)0x29, (byte)0x00};
@@ -375,11 +379,10 @@ public class WriteConfig extends Activity {
                     //TODO: SENSOR POWER CONFIG & TRIMMING
                     byte[] writeCommand12 = {(byte)0xFF, (byte)0x00}; //Default Sensor Power Config
                     byte[] writeCommand14 = {(byte)0x00, (byte)0x00}; //Default Sensor trimming max kOhm
-
                     byte[] writeCommand15 = {(byte)0x70, (byte)0x40}; //Default Sensor 0 Control word:
                     byte[] writeCommand16 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand17 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
-                    byte[] writeCommand18 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 Conditioner Config
+                    byte[] writeCommand18 = {(byte)0xFF, (byte)0x80}; //Default Sensor 0 Conditioner Config
                     byte[] writeCommand19 = {(byte)0x80, (byte)0x00}; //Default Sensor 0 Connection Config
                     byte[] writeCommand1A = {(byte)0x10, (byte)0x00}; //Default Sensor 0 Resistance Network.
                     //for external voltage difference detection sensor
@@ -398,7 +401,7 @@ public class WriteConfig extends Activity {
                         writeCommand19[0] = (byte)0x31; writeCommand19[1] = (byte)0x02;
                         writeCommand1A[0] = (byte)0x00; writeCommand1A[1] = (byte)0x80;
                     }*/
-                    switch (pga1Gain) { //[8→75g] bits 11:8 (see xls) 0b0000XXXX of byte[B]
+                    /*switch (pga1Gain) { //[8→75g] bits 11:8 (see xls) 0b0000XXXX of byte[B]
                         case 0: //Default
                             writeCommand18[1] |= 0b00000000;
                             break;
@@ -460,10 +463,10 @@ public class WriteConfig extends Activity {
                         case 7:
                             writeCommand18[1] |= 0b01110000;
                             break;
-                    }
+                    }*/
                     if(sensor0Chopper) {
-                        writeCommand18[1] |= 0b10000000;
-                        writeCommand18[0] |= 0b11111111;
+//                        writeCommand18[1] |= 0b10000000;
+//                        writeCommand18[0] |= 0b11111111;
                     }
                     //18[0]
                     /*String dacOffset = mEditTextSensor0DacOffset.getText().toString();
@@ -505,6 +508,10 @@ public class WriteConfig extends Activity {
                     Log.e(TAG,"Write[0x20] = 0x"+ViewConfig.toHexStringBigEndian(writeCommand20));*/
                     //WRITE:                 Tag,    address, commandBytes[A, B]
                     if(writeToDevice) {
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x04, writeCommand04); // DMA Configuration
+//                        MainActivity.delayMS(50);
+//                        tranceiveWriteEEPROM(nfcVTag, (byte)0x05, writeCommand05); // DMA Configuration
+//                        MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x09, writeCommand09); // DMA Configuration
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x0A, writeCommand0A); // DMA Source Start Address
