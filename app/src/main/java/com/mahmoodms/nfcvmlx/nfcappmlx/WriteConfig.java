@@ -372,14 +372,15 @@ public class WriteConfig extends Activity {
                     byte[] writeCommand0C = {(byte)0xD7, (byte)0x00};
                     //TIMER CONTROL:
 //                    byte[] writeCommand0F = {(byte)0x01, (byte)0x00}; //1
+//                    byte[] writeCommand10 = {(byte)0x14, (byte)0x00}; //s
+
 //                    byte[] writeCommand0F = {(byte)0xFA, (byte)0x00}; //250
                     byte[] writeCommand0F = {(byte)0xF4, (byte)0x01}; //500
                     byte[] writeCommand10 = {(byte)0x04, (byte)0x00}; //ms
-//                    byte[] writeCommand10 = {(byte)0x14, (byte)0x00}; //s
                     //TODO: SENSOR POWER CONFIG & TRIMMING
                     byte[] writeCommand12 = {(byte)0xFF, (byte)0x00}; //Default Sensor Power Config
                     byte[] writeCommand14 = {(byte)0x00, (byte)0x00}; //Default Sensor trimming max kOhm
-                    byte[] writeCommand15 = {(byte)0x70, (byte)0x40}; //Default Sensor 0 Control word:
+                    byte[] writeCommand15 = {(byte)0x70, (byte)0x80}; //Default Sensor 0 Control word:
                     byte[] writeCommand16 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand17 = {(byte)0x00, (byte)0x00}; //Default Sensor 0 threshold (0):
                     byte[] writeCommand18 = {(byte)0xFF, (byte)0x80}; //Default Sensor 0 Conditioner Config
