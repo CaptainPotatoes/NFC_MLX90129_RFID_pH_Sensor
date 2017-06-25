@@ -373,8 +373,10 @@ public class WriteConfig extends Activity {
                     //TIMER CONTROL:
 //                    byte[] writeCommand0F = {(byte)0x01, (byte)0x00}; //1
 //                    byte[] writeCommand10 = {(byte)0x14, (byte)0x00}; //s
-
+                    // TODO: 6/15/2017 - Change timer to 100ms (10Hz):
+//                    byte[] writeCommand0F = {(byte)0x64, (byte)0x00}; //100
 //                    byte[] writeCommand0F = {(byte)0xFA, (byte)0x00}; //250
+
                     byte[] writeCommand0F = {(byte)0xF4, (byte)0x01}; //500
                     byte[] writeCommand10 = {(byte)0x04, (byte)0x00}; //ms
                     //TODO: SENSOR POWER CONFIG & TRIMMING
@@ -543,20 +545,7 @@ public class WriteConfig extends Activity {
                         MainActivity.delayMS(50);
                         tranceiveWriteEEPROM(nfcVTag, (byte)0x1A, writeCommand1A); // Sensor 0 Resistance Network
                         MainActivity.delayMS(50);
-                        /*tranceiveWriteEEPROM(nfcVTag, (byte)0x1B, writeCommand1B); // Sensor 1 Control Word
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1C, writeCommand1C); // Sensor 1 ThreshLow
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1D, writeCommand1D); // Sensor 1 ThreshHigh
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1E, writeCommand1E); // Sensor 1 Conditioner Config
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x1F, writeCommand1F); // Sensor 1 Connection Config
-                        MainActivity.delayMS(50);
-                        tranceiveWriteEEPROM(nfcVTag, (byte)0x20, writeCommand20); // Sensor 1 Resistance Network*/
                     }
-                    //TODO: Set condition for checking if SPI is available, then ungrey using [mCheckBoxSPI.setEnabled(true);]
-                    //: If either sensor is disabled, grey out its settings and change the color of TV to Grey.
                 }
             }
         }

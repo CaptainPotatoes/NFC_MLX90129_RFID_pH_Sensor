@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
     private Button mSetConfigButton;
 
     public final static ColorDrawable actionBarTheme = new ColorDrawable(Color.parseColor("#A9A9A9"));
-    private int timerPeriod = 550;
+    private int timerPeriod = 530;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -248,10 +248,8 @@ public class MainActivity extends Activity {
     private boolean sensor0Enabled = false;
     private boolean sensor1Enabled = false;
     private int[] timeStampData = new int[100];
-    private int timeStampIndex;
     private int[] sensor0Data = new int[256];
     private int sensor0Index;
-    private int sensor1Index;
     private int lastPlottedIndex;
     private int[] sensor1Data = new int[100];
     private BoundaryMode currentBM = BoundaryMode.AUTO;
@@ -287,36 +285,27 @@ public class MainActivity extends Activity {
                         //TODO: USE IMPLICIT X VALUES!
                     }*/
                     //Check which address they are being stored at:
-                    final byte[] readDataAddress = tranceiveReadInternal(nfcVTag, (byte)0x05);
-                    delayMS(20);
-                    Log.e(TAG, "readDataAddress = 0x"+ViewConfig.toHexStringBigEndian(readDataAddress));
-                    if(readDataAddress.length>2) {
-                        Log.e("byte 1:",Integer.toHexString((int) readDataAddress[0]));
-                        Log.e("byte 2:",Integer.toHexString((int) readDataAddress[1]));
-                        Log.e("byte 3:",Integer.toHexString((int) readDataAddress[2]));
-                    }
 
-                    timeStampIndex = 0;
+
                     sensor0Index = 0;
-                    sensor1Index = 0;
-                    lastPlottedIndex = 0;
-//                    readDataAddress[1] = (byte) 0x29;
                     //TODO: CHECK IF BITMASKS ENABLED (needs to have 2+ of either Timestamps, S0, S1 or S2 enabled)
                     class graphData implements Runnable {
                         @Override
                         public void run() {
-//                            Log.e(TAG, "isConnected: "+String.valueOf(nfcVTag.isConnected()));
                             if(nfcVTag.isConnected()) {
+                                final byte[] readDataAddress = tranceiveReadInternal(nfcVTag, (byte)0x05);
+                                delayMS(20);
+                                Log.e(TAG, "readDataAddress = 0x"+ViewConfig.toHexStringBigEndian(readDataAddress));
                                 if(readDataAddress.length>2) {
-                                    boolean a = true;
+                                    Log.e("byte 1:",Integer.toHexString((int) readDataAddress[0]));
+                                    Log.e("byte 2:",Integer.toHexString((int) readDataAddress[1]));
+                                    Log.e("byte 3:",Integer.toHexString((int) readDataAddress[2]));
+                                }
+                                if(readDataAddress.length>2) {
                                     byte[] readEEPROM = tranceiveReadEEPROM(nfcVTag, readDataAddress[1]);
                                     if(readEEPROM.length>2) {
                                         byte[] sensor0Datapoint = {readEEPROM[1], readEEPROM[2]};
                                         sensor0Data[sensor0Index] = bytesWordToIntAlt(sensor0Datapoint);
-//                                        if (sensor0Data[sensor0Index]==43690 || sensor0Data[sensor0Index]==0) {
-//                                            a = false;
-//                                        } else {
-//                                        }
                                         updateIonSensorData(0, sensor0Data[sensor0Index]);
                                         Log.e(TAG,"INTVAL S0: "+String.valueOf(sensor0Data[sensor0Index]));
                                         sensor0Index++;
@@ -326,12 +315,17 @@ public class MainActivity extends Activity {
                                     //TODO: Add condition: only if LOOP enabled; otherwise just stop @ 0xD7
                                     Log.e(TAG,"CurrAddr:[0x"+ ViewConfig.toHexStringLittleEndian(readDataAddress)+"]");
                                     if(readDataAddress[1]!=(byte)0xFF) {
-                                        if(a) readDataAddress[1]++;
+//                                        final byte[] readDataAddress0 = tranceiveReadInternal(nfcVTag, (byte)0x05);
+//                                        readDataAddress[1] = readDataAddress0[1];
+//                                        Log.e("byte 2:","readDataAddress: "+ Integer.toHexString((int) readDataAddress[1]));
+//                                        readDataAddress[1]++;
                                     } else {
-                                        readDataAddress[1] = (byte)0x29;
+//                                        final byte[] readDataAddress0 = tranceiveReadInternal(nfcVTag, (byte)0x05);
+//                                        readDataAddress[1] = readDataAddress0[1];
+//                                        Log.e("byte 2:","readDataAddress: "+ Integer.toHexString((int) readDataAddress[1]));
                                         sensor0Index=0;
+//                                        readDataAddress[1] = (byte)0x29;
                                     }
-//                                    readDataAddress[1]++;
                                 }
                             }
                         }
@@ -341,9 +335,6 @@ public class MainActivity extends Activity {
                         executor.scheduleAtFixedRate(new graphData(), 0, timerPeriod, TimeUnit.MILLISECONDS);
                         initExecutor = true;
                     }
-//                    if(!nfcVTag.isConnected())initExecutor = false;
-                    //Get values (Timestamp, Sensor 0, Sensor 1)
-                    //Can plot both Sensor 0 and Sensor 1 separately.
                 }
             }
         }
